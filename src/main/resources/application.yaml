@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: mmorpg-platform-api
+server:
+  port: 4000
