@@ -9,9 +9,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -52,7 +49,7 @@ public class SecurityConfig {
                 // Desativa o "request cache".
                 // Em aplicações web com login via formulário, o Spring pode "salvar" a URL original para redirecionar após login.
                 // Em API REST isso não faz sentido e pode causar comportamentos estranhos.
-                .requestCache(RequestCacheConfigurer::disable)
+                .requestCache(rs -> rs.disable())
 
                 // Habilita CORS e diz ao Spring Security para usar o bean CorsConfigurationSource abaixo.
                 // Sem isso, o navegador pode bloquear chamadas do frontend (erro de CORS), especialmente com Authorization header.
@@ -63,7 +60,7 @@ public class SecurityConfig {
                 // Desabilita CSRF.
                 // CSRF é importante quando você autentica via cookies/sessão (navegador).
                 // Para API stateless com JWT no header Authorization, normalmente CSRF pode ficar desabilitado.
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
 
                 // Configura a aplicação como STATELESS (sem sessão HTTP).
                 // Isso significa:
@@ -96,7 +93,7 @@ public class SecurityConfig {
                     headers.contentTypeOptions(Customizer.withDefaults());
 
                     // X-Frame-Options: DENY
-                    headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::deny);
+                    headers.frameOptions(frame -> frame.deny());
 
                     // HSTS somente em produção
                     if (isProd) {
@@ -105,13 +102,12 @@ public class SecurityConfig {
                                 .maxAgeInSeconds(31536000)
                         );
                     } else {
-                        headers.httpStrictTransportSecurity(HeadersConfigurer.HstsConfig::disable);
+                        headers.httpStrictTransportSecurity(hsts -> hsts.disable());
                     }
                 })
 
                 // Autenticação HTTP Basic (temporária).
-                // Hoje: Authorization: Basic base64(user:pass)
-                // Futuro: trocar por JWT (Authorization: Bearer <token>).
+                // TODO: Replace HTTP Basic with JWT Bearer authentication
                 // Quando trocar para JWT, provavelmente você removerá esta linha e configurará oauth2ResourceServer().jwt()
                 // ou um filtro custom de JWT.
                 .httpBasic(Customizer.withDefaults());
