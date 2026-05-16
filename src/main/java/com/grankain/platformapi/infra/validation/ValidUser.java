@@ -20,7 +20,7 @@ import java.lang.annotation.*;
 @NotBlank(message = "Username não pode estar em branco.")
 @Size(min = 5, max = 12, message = "O nome de usuário deve ter entre 5 e 12 caracteres.")
 @Pattern(
-        regexp = "^[a-zA-Z0-9].*$",
+        regexp = "^[a-zA-Z0-9]+$",
         message = "O nome de usuário deve conter apenas letras e números."
 )
 public @interface ValidUser {

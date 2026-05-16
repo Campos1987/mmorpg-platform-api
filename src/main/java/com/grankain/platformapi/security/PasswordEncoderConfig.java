@@ -1,4 +1,4 @@
-package com.grankain.platformapi.config;
+package com.grankain.platformapi.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Configuração centralizada para codificação de senhas.
+ *
  * @Configuration: Indica que esta classe é uma fonte de definições de beans para o contexto do Spring.
  */
 @Configuration
@@ -15,7 +16,7 @@ public class PasswordEncoderConfig {
     /**
      * Define o algoritmo de hash de senha que será usado em toda a aplicação.
      * Argon2id é atualmente considerado um dos algoritmos mais seguros contra ataques de força bruta.
-     * 
+     *
      * @return Uma instância de PasswordEncoder configurada com Argon2.
      */
     @Bean

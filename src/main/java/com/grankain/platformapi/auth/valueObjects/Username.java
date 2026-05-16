@@ -1,6 +1,7 @@
 package com.grankain.platformapi.auth.valueObjects;
 
 import jakarta.persistence.Embeddable;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Value Object que representa o nome de usuário (Login).
@@ -8,22 +9,28 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public record Username(String value) {
     // Regex para permitir apenas letras e números.
-    private static final String REGEXP = "^[a-zA-Z0-9].*$";
+    private static final String REGEXP = "^[a-zA-Z0-9]+$";
+    ;
 
     public Username {
         // Validação de presença.
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Username não pode ser vazio.");
+            throw new IllegalArgumentException("The username cannot be empty.");
         }
         // Validação de tamanho mínimo.
-        if (value.length() < 3) {
-            throw new IllegalArgumentException("Username deve ter pelo menos 3 caracteres.");
+        if (value.length() < 5) {
+            throw new IllegalArgumentException("The username must be at least 5 characters long.");
+        }
+
+        // Validação de tamanho maximo.
+        if (value.length() > 12) {
+            throw new IllegalArgumentException("The username must be a maximum of 12 characters long.");
         }
 
         // Validação de formato (apenas alfanuméricos).
         if (!value.matches(REGEXP)) {
             throw new IllegalArgumentException(
-                    "O nome de usuário deve conter apenas letras e números."
+                    "The username must contain only letters and numbers."
             );
         }
     }
