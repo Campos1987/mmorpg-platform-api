@@ -1,4 +1,4 @@
-package com.grankain.platformapi.auth.valueObjects;
+package com.grankain.platformapi.auth.domain.vo;
 
 import jakarta.persistence.Embeddable;
 

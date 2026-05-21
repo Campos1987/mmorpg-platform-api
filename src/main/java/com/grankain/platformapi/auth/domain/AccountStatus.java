@@ -1,4 +1,4 @@
-package com.grankain.platformapi.auth.enums;
+package com.grankain.platformapi.auth.domain;
 
 /**
  * Enumeração que representa os possíveis estados de uma conta de usuário.

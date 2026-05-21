@@ -1,4 +1,4 @@
-package com.grankain.platformapi.auth.dto;
+package com.grankain.platformapi.auth.dto.request;
 
 import com.grankain.platformapi.infra.validation.ValidPassword;
 import com.grankain.platformapi.infra.validation.ValidUser;
@@ -7,11 +7,11 @@ import jakarta.validation.constraints.*;
 /**
  * Data Transfer Object (DTO) para o registro de novos usuários.
  * O uso de 'record' garante que este objeto seja imutável e leve.
- * 
+ * <p>
  * As anotações do 'jakarta.validation' permitem validar os dados antes mesmo
  * de eles chegarem à camada de Service.
  */
-public record RequestRegister(
+public record Register(
         @NotBlank(message = "Username é obrigatório")
         @ValidUser // Validação customizada definida no pacote 'infra.validation'.
         String user,
@@ -29,6 +29,7 @@ public record RequestRegister(
         String lastname,
 
         @NotBlank
+        @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}", message = "Data deve estar no formato YYYY-MM-DD")
         String birthday,
 
         @NotBlank

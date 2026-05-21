@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Docker ###
+# Nunca commitar o .env com credenciais reais — use .env.example como template
+.env
+# Arquivo dockerfile (lowercase) legado — substituído pelo Dockerfile
+dockerfile

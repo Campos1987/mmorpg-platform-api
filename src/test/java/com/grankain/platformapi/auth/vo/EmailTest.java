@@ -1,7 +1,8 @@
-package com.grankain.platformapi.auth.valueObjects;
+package com.grankain.platformapi.auth.vo;
 
 // Imports do JUnit 5 (Jupyter) para estruturar os testes
 
+import com.grankain.platformapi.auth.domain.vo.Email;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

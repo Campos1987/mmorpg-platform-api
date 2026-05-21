@@ -1,7 +1,4 @@
-package com.grankain.platformapi.infra.exceptions.dto;
-
-import java.time.Instant;
-import java.util.List;
+package com.grankain.platformapi.infra.exception.dto;
 
 /**
  * Representa um único frame (linha) de uma exceção no Java.

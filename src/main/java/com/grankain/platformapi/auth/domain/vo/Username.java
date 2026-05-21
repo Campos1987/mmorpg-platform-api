@@ -1,7 +1,6 @@
-package com.grankain.platformapi.auth.valueObjects;
+package com.grankain.platformapi.auth.domain.vo;
 
 import jakarta.persistence.Embeddable;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Value Object que representa o nome de usuário (Login).

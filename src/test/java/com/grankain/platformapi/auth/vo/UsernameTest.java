@@ -1,5 +1,6 @@
-package com.grankain.platformapi.auth.valueObjects;
+package com.grankain.platformapi.auth.vo;
 
+import com.grankain.platformapi.auth.domain.vo.Username;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -29,10 +29,11 @@ import javax.sql.DataSource;
         entityManagerFactoryRef = "loginEntityManagerFactory",
         transactionManagerRef = "loginTransactionManager"
 )
-public class LoginMySqlConfig {
+public class DatabaseConfig {
 
     /**
      * Propriedades de conexão do banco "dbLogin" lidas do application.yaml.
+     *
      * @Primary: Indica que este é o DataSource principal caso existam outros sem qualificadores.
      */
     @Bean
@@ -64,7 +65,7 @@ public class LoginMySqlConfig {
         return builder
                 .dataSource(dataSource)
                 // Pacotes escaneados pelo Hibernate em busca de classes anotadas com @Entity.
-                .packages("com.grankain.platformapi.auth.entity")
+                .packages("com.grankain.platformapi.auth.domain")
                 .persistenceUnit("LoginPU")
                 .build();
     }

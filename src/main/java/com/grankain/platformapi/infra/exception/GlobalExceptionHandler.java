@@ -1,12 +1,14 @@
-package com.grankain.platformapi.infra.exceptions;
+package com.grankain.platformapi.infra.exception;
 
-import com.grankain.platformapi.infra.exceptions.dto.ApiErrorException;
-import com.grankain.platformapi.infra.exceptions.dto.ApiTraceItem;
+import com.grankain.platformapi.auth.exceptions.AccountAlreadyExistsException;
+import com.grankain.platformapi.infra.exception.dto.ApiErrorException;
+import com.grankain.platformapi.infra.exception.dto.ApiTraceItem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,6 +36,49 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     public GlobalExceptionHandler(Environment environment) {
         this.isDev = environment.acceptsProfiles(Profiles.of("dev"));
+    }
+
+    /**
+     * Intercepta a exceção de domínio quando um usuário ou e-mail já estão em uso.
+     * Retorna HTTP 409 (Conflict).
+     */
+    @ExceptionHandler(AccountAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorException> handleAccountAlreadyExistsException(
+            AccountAlreadyExistsException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                ex,
+                request
+        );
+    }
+
+    /**
+     * Intercepta erros de autenticação do Spring Security (ex: senha errada ou usuário bloqueado).
+     * Retorna HTTP 401 (Unauthorized) com a mensagem específica do motivo da falha.
+     *
+     * @param ex      A exceção de credenciais inválidas capturada.
+     * @param request Dados da requisição original.
+     * @return Resposta padronizada conforme o DTO ApiErrorException.
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiErrorException> handleBadCredentialsException(
+            BadCredentialsException ex,
+            HttpServletRequest request
+    ) {
+        // Define o status fixo como 401 (Unauthorized), padrão para falhas de login/autenticação
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        // Recupera o texto passado no 'throw new BadCredentialsException("mensagem")',
+        // ou usa a descrição padrão do HTTP 401 caso nenhuma mensagem tenha sido informada.
+        String message = ex.getMessage() != null
+                ? ex.getMessage()
+                : status.getReasonPhrase();
+
+        // Monta e retorna o JSON estruturado respeitando as regras do ambiente (Dev vs Prod)
+        return buildResponse(status, message, ex, request);
     }
 
     /**

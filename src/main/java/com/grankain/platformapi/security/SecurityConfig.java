@@ -33,8 +33,11 @@ import java.util.List;
 @EnableMethodSecurity // Habilita anotações como @PreAuthorize / @PostAuthorize nos métodos (controllers/services).
 public class SecurityConfig {
 
-    @Value("${spring.application.cors-origins:}")
-    private String originsEnv;
+    private final String originsEnv;
+
+    public SecurityConfig(@Value("${spring.application.cors-origins:}") String originsEnv) {
+        this.originsEnv = originsEnv;
+    }
 
     /**
      * Define a "cadeia de filtros" do Spring Security.
@@ -137,9 +140,9 @@ public class SecurityConfig {
         List<String> allowedOrigins = (originsEnv == null || originsEnv.isBlank())
                 ? List.of()
                 : Arrays.stream(originsEnv.split(","))
-                  .map(String::trim)
-                  .filter(s -> !s.isBlank())
-                  .toList();
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
 
         CorsConfiguration config = new CorsConfiguration();
 

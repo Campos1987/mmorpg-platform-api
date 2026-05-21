@@ -1,12 +1,12 @@
-package com.grankain.platformapi.auth.entity;
+package com.grankain.platformapi.auth.domain;
 
-import com.grankain.platformapi.auth.enums.AccountStatus;
-import com.grankain.platformapi.auth.valueObjects.Email;
-import com.grankain.platformapi.auth.valueObjects.EncodedPassword;
-import com.grankain.platformapi.auth.valueObjects.Password;
-import com.grankain.platformapi.auth.valueObjects.Username;
+import com.grankain.platformapi.auth.domain.vo.Email;
+import com.grankain.platformapi.auth.domain.vo.Password;
+import com.grankain.platformapi.auth.domain.vo.Username;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,9 +20,11 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "accounts")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // use apenas o @Id
 public class Account {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID) // Gera automaticamente um Identificador Único Universal (UUID).
     private UUID id;
@@ -51,20 +53,28 @@ public class Account {
     private AccountStatus status;
 
     // Campo temporário para transporte ou processamento de senha em texto puro (se necessário).
-    @Transient // Indica ao Hibernate que este campo não deve ser persistido no banco de dados.
+    @Transient
     private Password password;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
-    private EncodedPassword encodedPassword;
+    @Column(name = "password", nullable = false)
+    private String encodedPassword;
 
     @CreationTimestamp // Preenchido automaticamente pelo Hibernate no momento do INSERT.
-    @Column(name = "createdAt", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp // Atualizado automaticamente pelo Hibernate no momento de qualquer UPDATE.
-    @Column(name = "accessedAt", nullable = false)
+    @Column(name = "accessed_at", nullable = false)
     private Instant accessedAt;
+
+    @Column(name = "failed_access_counter", nullable = false)
+    private int failedAccessCounter;
+
+    @Column(name = "failed_at")
+    private Instant failedAt;
+
+    @Column(name = "last_ip")
+    private String lastIp;
 
     /**
      * Construtor padrão (exigido pela especificação JPA).
@@ -77,7 +87,7 @@ public class Account {
      * Centraliza a lógica de formatação de nome e data de nascimento.
      */
     public Account(String name, String lastname, Email email, String birthday, Username user,
-                   AccountStatus status, EncodedPassword encodedPassword) {
+                   AccountStatus status, String encodedPassword) {
         this.fullName = capitalizeFullName(name + " " + lastname);
         this.email = email;
         this.birthday = formatBirthday(birthday);

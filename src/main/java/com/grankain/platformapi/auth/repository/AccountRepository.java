@@ -1,8 +1,8 @@
 package com.grankain.platformapi.auth.repository;
 
-import com.grankain.platformapi.auth.entity.Account;
-import com.grankain.platformapi.auth.valueObjects.Email;
-import com.grankain.platformapi.auth.valueObjects.Username;
+import com.grankain.platformapi.auth.domain.Account;
+import com.grankain.platformapi.auth.domain.vo.Email;
+import com.grankain.platformapi.auth.domain.vo.Username;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -20,10 +20,15 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
      */
     Boolean existsByEmailOrUser(Email email, Username user);
 
+
     /**
      * Busca uma conta através do e-mail ou nome de usuário.
      * Retorna um Optional, o que obriga o chamador a tratar o caso onde o usuário não é encontrado.
      */
     Optional<Account> findAccountByEmailOrUser(Email email, Username user);
+
+    Optional<Account> findByEmail(Email email);
+
+    Optional<Account> findByUser(Username user);
 }
 

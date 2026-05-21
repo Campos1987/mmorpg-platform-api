@@ -1,4 +1,4 @@
-package com.grankain.platformapi.auth.valueObjects;
+package com.grankain.platformapi.auth.domain.vo;
 
 import jakarta.persistence.Embeddable;
 
@@ -12,21 +12,16 @@ public record Password(String value) {
     private static final String REGEXP = "^(?=\\S+$)(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).*$";
 
     public Password {
-        // Validação de tamanho: entre 8 e 12 caracteres.
-        if (value == null || value.length() < 8 || value.length() > 12) {
+        // Validação de tamanho: entre 5 e 12 caracteres.
+        if (value == null || value.length() < 5 || value.length() > 12) {
             throw new IllegalArgumentException("A senha deve ter entre 8 e 12 caracteres.");
         }
         // Validação de padrão (complexidade).
         if (!value.matches(REGEXP)) {
             throw new IllegalArgumentException(
                     "Senha inválida. Deve conter pelo menos uma letra maiúscula, um número, " +
-                             "um caractere especial e não pode conter espaços."
+                            "um caractere especial e não pode conter espaços."
             );
         }
-    }
-
-    @Override
-    public String toString() {
-        return value;
     }
 }
