@@ -11,6 +11,11 @@ import com.grankain.platformapi.auth.repository.AccountRepository;
 import com.grankain.platformapi.util.IpUtil;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -22,11 +27,13 @@ public class LoginService {
     private final AccountRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final AccessCounterFailure accessCounterFailure;
+    private final JwtEncoder jwtEncoder;
 
-    public LoginService(AccountRepository repository, PasswordEncoder passwordEncoder, AccessCounterFailure accessCounterFailure) {
+    public LoginService(AccountRepository repository, PasswordEncoder passwordEncoder, AccessCounterFailure accessCounterFailure, JwtEncoder jwtEncoder) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.accessCounterFailure = accessCounterFailure;
+        this.jwtEncoder = jwtEncoder;
     }
 
     public Login authLogin(com.grankain.platformapi.auth.dto.request.Login login) {
@@ -45,7 +52,9 @@ public class LoginService {
         //Se o usuário não existir, interrompemos o fluxo com uma exceção
         Account user = userOptional.orElseThrow(() -> new BadCredentialsException("Invalid User"));
 
-        boolean validPassword = passwordEncoder.matches(login.password(), userOptional.get().getEncodedPassword());
+        System.out.println(password);
+        System.out.println(password.toString());
+        boolean validPassword = passwordEncoder.matches(password.toString(), userOptional.get().getEncodedPassword());
 
         String ipUser = IpUtil.getClientIp();
         if (!validPassword) {
@@ -56,7 +65,20 @@ public class LoginService {
         user.setLastIp(ipUser);
         repository.save(user);
 
+        long expiry = 3600L; // 1 hora de expiração
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("mmorpg-l2-api")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(expiry))
+                .subject(user.getUser().toString()) // Username ou ID
+                .claim("scope", "ROLE_" + user.getAccess().name())
+                .build();
+
+        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
+        String tokenGenerate = this.jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+
         // Retornamos o objeto de sucesso
-        return new Login(Instant.now());
+        return new Login(Instant.now(), tokenGenerate);
     }
 }

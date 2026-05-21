@@ -7,6 +7,7 @@ import java.time.Instant;
  * Protege a Entidade original, expondo apenas os dados necessários para o cliente.
  */
 public record Login(
-        Instant loginTime) {
+        Instant loginTime,
+        String claims) {
 
 }

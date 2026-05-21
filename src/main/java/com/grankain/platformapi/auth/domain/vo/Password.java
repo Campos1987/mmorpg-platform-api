@@ -24,4 +24,9 @@ public record Password(String value) {
             );
         }
     }
+
+    @Override
+    public @jakarta.validation.constraints.NotNull String toString() {
+        return this.value;
+    }
 }

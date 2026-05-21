@@ -1,5 +1,12 @@
 package com.grankain.platformapi.security;
 
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,11 +17,19 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +49,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final String originsEnv;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     public SecurityConfig(@Value("${spring.application.cors-origins:}") String originsEnv) {
         this.originsEnv = originsEnv;
@@ -58,6 +76,7 @@ public class SecurityConfig {
                 // Sem isso, o navegador pode bloquear chamadas do frontend (erro de CORS), especialmente com Authorization header.
                 .cors(cors -> {
                     // A configuração real de CORS está no método corsConfigurationSource().
+                    corsConfigurationSource();
                 })
 
                 // Desabilita CSRF.
@@ -89,6 +108,7 @@ public class SecurityConfig {
 
                         // Qualquer outro endpoint (PUT/PATCH/DELETE e demais rotas) exige autenticação.
                         // Quando migrar para JWT, aqui significa "tem que mandar Bearer token válido".
+                        .requestMatchers(HttpMethod.POST, "/dashboard/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> {
@@ -108,12 +128,9 @@ public class SecurityConfig {
                         headers.httpStrictTransportSecurity(hsts -> hsts.disable());
                     }
                 })
-
-                // Autenticação HTTP Basic (temporária).
-                // TODO: Replace HTTP Basic with JWT Bearer authentication
-                // Quando trocar para JWT, provavelmente você removerá esta linha e configurará oauth2ResourceServer().jwt()
-                // ou um filtro custom de JWT.
-                .httpBasic(Customizer.withDefaults());
+                // Aqui está a mágica: Spring intercepta o Bearer token automaticamente
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(
+                        Customizer.withDefaults()));
 
         return http.build();
     }
@@ -182,5 +199,20 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
 
         return source;
+    }
+
+    // Decoder: Usado pelo Spring para validar o token recebido nas requisições
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        SecretKey secretKey = new SecretKeySpec(this.jwtSecret.getBytes(), "HmacSHA256");
+        return NimbusJwtDecoder.withSecretKey(secretKey).build();
+    }
+
+    // Encoder: Usado por você para gerar o token após o login do usuário
+    @Bean
+    public JwtEncoder jwtEncoder() {
+        JWK jwk = new OctetSequenceKey.Builder(this.jwtSecret.getBytes()).build();
+        JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
+        return new NimbusJwtEncoder(jwks);
     }
 }

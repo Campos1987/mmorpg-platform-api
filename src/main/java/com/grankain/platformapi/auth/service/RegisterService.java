@@ -1,5 +1,6 @@
 package com.grankain.platformapi.auth.service;
 
+import com.grankain.platformapi.auth.domain.UserAccess;
 import com.grankain.platformapi.auth.dto.response.Register;
 import com.grankain.platformapi.auth.domain.Account;
 import com.grankain.platformapi.auth.domain.AccountStatus;
@@ -58,7 +59,8 @@ public class RegisterService {
                 register.birthday(),
                 username,
                 AccountStatus.PENDING,
-                hash
+                hash,
+                UserAccess.USER
         );
 
         // Persistência: Salva a nova conta no banco de dados através do JPA.

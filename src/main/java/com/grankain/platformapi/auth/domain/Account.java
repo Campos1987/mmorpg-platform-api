@@ -76,6 +76,10 @@ public class Account {
     @Column(name = "last_ip")
     private String lastIp;
 
+    @Column(name = "access", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserAccess access = UserAccess.USER;
+
     /**
      * Construtor padrão (exigido pela especificação JPA).
      */
@@ -87,13 +91,14 @@ public class Account {
      * Centraliza a lógica de formatação de nome e data de nascimento.
      */
     public Account(String name, String lastname, Email email, String birthday, Username user,
-                   AccountStatus status, String encodedPassword) {
+                   AccountStatus status, String encodedPassword, UserAccess access) {
         this.fullName = capitalizeFullName(name + " " + lastname);
         this.email = email;
         this.birthday = formatBirthday(birthday);
         this.user = user;
         this.status = status;
         this.encodedPassword = encodedPassword;
+        this.access = access;
     }
 
     /**
