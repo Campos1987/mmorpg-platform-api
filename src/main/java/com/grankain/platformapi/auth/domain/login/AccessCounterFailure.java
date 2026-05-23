@@ -7,13 +7,13 @@ import com.grankain.platformapi.auth.repository.AccountRepository;
 import com.grankain.platformapi.auth.repository.BlockIpUserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
 
 @Component
-@Transactional
 public class AccessCounterFailure {
 
     private final AccountRepository accountRepository;
@@ -30,9 +30,12 @@ public class AccessCounterFailure {
         if (user.getFailedAccessCounter() >= 5) {
             user.setStatus(AccountStatus.SUSPENDED);
         }
-        accountRepository.save(user);
+        //saveAndFlush força a gravação no banco no mesmo segundo:
+        accountRepository.saveAndFlush(user);
     }
 
+    // Mesmo que o filtro de segurança dê erro e cancele o login, as alterações deste método serão salvas!
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void blockIp(String ipUser) {
         Optional<BlockIpUser> checkIp = blockIpUserRepository.findByIpUser(ipUser);
         if (checkIp.isPresent()) {
@@ -40,18 +43,22 @@ public class AccessCounterFailure {
             //7 falhas de login vindas do mesmo IP	Endereço IP bloqueado temporariamente
             if (checkIp.get().getCount() < 7) {
                 BlockIpUser blockIpUser = checkIp.get();
+                blockIpUser.setBlockAt(Instant.now());
                 blockIpUser.setCount(blockIpUser.getCount() + 1);
 
-                blockIpUserRepository.save(blockIpUser);
+                blockIpUserRepository.saveAndFlush(blockIpUser);
             } else {
                 throw new BadCredentialsException("Account user suspended or blocked");
             }
         } else {
+            System.out.println("nao esta presente");
             BlockIpUser blockIpUser = new BlockIpUser(ipUser, 1, Instant.now());
-            blockIpUserRepository.save(blockIpUser);
+            blockIpUserRepository.saveAndFlush(blockIpUser);
         }
     }
 
+    // Mesmo que o filtro de segurança dê erro e cancele o login, as alterações deste método serão salvas!
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void countFailure(Account user, String ipUser) {
         int countFailureUser = user.getFailedAccessCounter();
 

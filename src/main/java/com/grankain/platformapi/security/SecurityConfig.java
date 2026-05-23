@@ -101,10 +101,11 @@ public class SecurityConfig {
 
                         // Libera leitura pública de posts (somente GET).
                         // Isso cobre /posts/events, /posts/news e qualquer outro sub-path em /posts/**.
-                        .requestMatchers(HttpMethod.GET, "/posts/**", "/error").permitAll()
+                        // Remover /v3/api-docs
+                        .requestMatchers(HttpMethod.GET, "/posts/**", "/error", "/v3/api-docs").permitAll()
                         // Libera leitura pública de auth (somente POST).
                         // Isso cobre /auth/register, /auth/login.
-                        .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/v3/api-docs").permitAll()
 
                         // Qualquer outro endpoint (PUT/PATCH/DELETE e demais rotas) exige autenticação.
                         // Quando migrar para JWT, aqui significa "tem que mandar Bearer token válido".

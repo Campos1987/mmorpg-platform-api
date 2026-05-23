@@ -49,8 +49,14 @@ public class LoginService {
             userOptional = repository.findByUser(new Username(login.user()));
         }
 
+
         //Se o usuário não existir, interrompemos o fluxo com uma exceção
-        Account user = userOptional.orElseThrow(() -> new BadCredentialsException("Invalid User"));
+        if (userOptional.isEmpty()) {
+            accessCounterFailure.blockIp(ipUser);
+            throw new BadCredentialsException("Invalid User");
+        }
+
+        Account user = userOptional.get();
 
         if (user.getStatus() != AccountStatus.ACTIVE && user.getStatus() != AccountStatus.PENDING) {
             throw new BadCredentialsException("Account user suspended or blocked");

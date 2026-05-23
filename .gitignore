@@ -39,3 +39,4 @@ build/
 dockerfile
 
 /src/main/resources/application-dev.yaml
+ajustar-em-prod.txt

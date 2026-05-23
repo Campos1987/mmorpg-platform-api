@@ -97,6 +97,15 @@
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
             <scope>compile</scope>
         </dependency>
+
+        <!--Remover -->
+        <!-- Source: https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.5</version> <!-- Versão estável e amplamente compatível com o ecossistema atual do SB 3.x -->
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -14,9 +14,7 @@ import java.time.Instant;
 public class BlockIpUser {
 
     @Id
-    @GeneratedValue
-    Long id;
-    @Column(name = "ip_user", nullable = false, unique = true)
+    @Column(name = "ip_user", nullable = false)
     private String ipUser;
 
     @Column(name = "count", nullable = false)
