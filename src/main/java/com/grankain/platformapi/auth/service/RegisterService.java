@@ -1,7 +1,8 @@
 package com.grankain.platformapi.auth.service;
 
 import com.grankain.platformapi.auth.domain.UserAccess;
-import com.grankain.platformapi.auth.dto.response.Register;
+import com.grankain.platformapi.auth.dto.request.RequestRegister;
+import com.grankain.platformapi.auth.dto.response.ResponseRegister;
 import com.grankain.platformapi.auth.domain.Account;
 import com.grankain.platformapi.auth.domain.AccountStatus;
 import com.grankain.platformapi.auth.exceptions.AccountAlreadyExistsException;
@@ -11,6 +12,8 @@ import com.grankain.platformapi.auth.domain.vo.Password;
 import com.grankain.platformapi.auth.domain.vo.Username;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service responsável pela lógica de registro de novas contas.
@@ -34,7 +37,10 @@ public class RegisterService {
      * @param register DTO com os dados da requisição.
      * @return DTO com os dados da conta criada para retorno à API.
      */
-    public Register authRegister(com.grankain.platformapi.auth.dto.request.Register register) {
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public ResponseRegister authRegister(RequestRegister register) {
+
+
         // Encapsulamento em Value Objects: Garante que os dados sejam válidos por design.
         Username username = new Username(register.user());
         Email email = new Email(register.email());
@@ -67,7 +73,7 @@ public class RegisterService {
         accountRepository.save(user);
 
         // Mapeamento: Converte a entidade de volta para um DTO de resposta (Response).
-        return new Register(user);
+        return new ResponseRegister(user.getUser().toString(), user.getEmail().toString());
     }
 }
 

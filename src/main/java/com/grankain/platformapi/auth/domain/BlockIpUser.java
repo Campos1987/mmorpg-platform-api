@@ -1,9 +1,6 @@
 package com.grankain.platformapi.auth.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -17,14 +14,15 @@ import java.time.Instant;
 public class BlockIpUser {
 
     @Id
-    @Column(name = "ip_user", nullable = false)
+    @GeneratedValue
+    Long id;
+    @Column(name = "ip_user", nullable = false, unique = true)
     private String ipUser;
 
     @Column(name = "count", nullable = false)
     private int count;
 
-    @UpdateTimestamp
-    @Column(name = "block_at", nullable = false, updatable = true)
+    @Column(name = "block_at")
     private Instant blockAt;
 
     public BlockIpUser() {

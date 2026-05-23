@@ -13,6 +13,7 @@ spring:
 
 server:
   port: 4000
+  forward-headers-strategy: native
 
 custom:
   security:
@@ -20,4 +21,4 @@ custom:
       user-name: "^[a-zA-Z0-9]+$"
 
 jwt:
-  secret: ${JWT_SECRET_KEY:8fK2vW9xZ4mQ7tN1sJ5cR3vF8xY0eU2iO6pW1bE9zAs=}
+  secret: ${JWT_SECRET_KEY}

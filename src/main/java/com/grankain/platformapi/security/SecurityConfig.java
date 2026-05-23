@@ -76,7 +76,7 @@ public class SecurityConfig {
                 // Sem isso, o navegador pode bloquear chamadas do frontend (erro de CORS), especialmente com Authorization header.
                 .cors(cors -> {
                     // A configuração real de CORS está no método corsConfigurationSource().
-                    corsConfigurationSource();
+                    cors.configurationSource(corsConfigurationSource());
                 })
 
                 // Desabilita CSRF.

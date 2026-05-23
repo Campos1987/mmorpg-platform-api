@@ -37,3 +37,5 @@ build/
 .env
 # Arquivo dockerfile (lowercase) legado — substituído pelo Dockerfile
 dockerfile
+
+/src/main/resources/application-dev.yaml

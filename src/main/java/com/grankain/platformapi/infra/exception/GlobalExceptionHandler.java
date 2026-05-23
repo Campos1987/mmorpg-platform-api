@@ -6,6 +6,7 @@ import com.grankain.platformapi.infra.exception.dto.ApiTraceItem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,6 +80,47 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 : status.getReasonPhrase();
 
         // Monta e retorna o JSON estruturado respeitando as regras do ambiente (Dev vs Prod)
+        return buildResponse(status, message, ex, request);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ApiErrorException> handleDateTimeParseException(
+            DateTimeParseException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        // Mensagem clara e segura para o cliente
+        String message = "Invalid date. Please ensure you submit an actual date in YYYY-MM-DD format.";
+
+        return buildResponse(status, message, ex, request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorException> handleDataIntegrityViolationException(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        // Mensagem genérica segura (fallback)
+        String message = "Data conflict: The resource already exists or violates a database rule.";
+
+        // Extrai a causa raiz para inspecionar a mensagem original do banco de dados
+        Throwable rootCause = ex.getRootCause();
+
+        if (rootCause != null && rootCause.getMessage() != null) {
+            String dbMessage = rootCause.getMessage().toLowerCase();
+
+            // Mapeamento amigável baseado no nome da constraint ou coluna
+            // (Ajuste "email" e "username" para bater com o nome exato das suas colunas/constraints no banco)
+            if (dbMessage.contains("email")) {
+                message = "Conflict: This email address is already registered.";
+            } else if (dbMessage.contains("username")) {
+                message = "Conflict: This username is already in use.";
+            }
+        }
+
         return buildResponse(status, message, ex, request);
     }
 

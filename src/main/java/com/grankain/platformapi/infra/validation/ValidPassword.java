@@ -20,7 +20,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @ConstraintComposition(CompositionType.AND) // Exige que TODAS as anotações abaixo sejam válidas.
 @NotBlank(message = "A senha é obrigatória.")
-@Size(min = 5, max = 12, message = "A senha deve ter entre 5 e 12 caracteres.")
+@Size(min = 8, max = 12, message = "A senha deve ter entre 8 e 12 caracteres.")
 @Pattern(
         regexp = "^(?=\\S+$)(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).*$",
         message = "A senha deve conter: 1 letra maiúscula, 1 número, 1 caractere especial e não pode conter espaços."

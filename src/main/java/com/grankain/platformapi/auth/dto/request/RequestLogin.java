@@ -4,12 +4,12 @@ import com.grankain.platformapi.infra.validation.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record Login(
+public record RequestLogin(
         @NotBlank(message = "Username é obrigatório")
         @Size(min = 5, max = 100)
         String user,
 
-        @ValidPassword // Validação customizada para complexidade de senha.
+        @NotBlank
         String password
 ) {
 }

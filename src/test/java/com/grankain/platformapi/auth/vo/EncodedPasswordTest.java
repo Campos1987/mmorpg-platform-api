@@ -1,5 +1,6 @@
 package com.grankain.platformapi.auth.vo;
 
+import com.grankain.platformapi.auth.domain.vo.Password;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,9 +17,9 @@ class EncodedPasswordTest {
     @DisplayName("The value cannot be null.")
     void shouldThrowExceptionWhenPasswordNull() {
         // Cenário crítico: Garantir que o sistema não aceite nulo, evitando NullPointerException posterior
-        assertThatThrownBy(() -> new EncodedPassword(null))
+        assertThatThrownBy(() -> new Password(null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("hash da senha");
+                .hasMessageContaining("A senha deve ter entre 8 e 12 caracteres.");
 
     }
 

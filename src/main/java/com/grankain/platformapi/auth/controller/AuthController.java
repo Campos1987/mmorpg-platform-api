@@ -1,9 +1,12 @@
 package com.grankain.platformapi.auth.controller;
 
-import com.grankain.platformapi.auth.dto.response.Login;
-import com.grankain.platformapi.auth.dto.response.Register;
+import com.grankain.platformapi.auth.dto.request.RequestLogin;
+import com.grankain.platformapi.auth.dto.request.RequestRegister;
+import com.grankain.platformapi.auth.dto.response.ResponseLogin;
+import com.grankain.platformapi.auth.dto.response.ResponseRegister;
 import com.grankain.platformapi.auth.service.LoginService;
 import com.grankain.platformapi.auth.service.RegisterService;
+import com.grankain.platformapi.util.IpUtil;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +27,6 @@ public class AuthController {
     private final RegisterService registerService;
     private final LoginService loginService;
 
-    // TODO: O parâmetro LoginService deve ser declarado como um campo da classe ou removido se não for usado.
     public AuthController(RegisterService registerService, LoginService loginService) {
         this.registerService = registerService;
         this.loginService = loginService;
@@ -37,7 +39,7 @@ public class AuthController {
      * @return ResponseEntity com o DTO de resposta e status HTTP 201 (Created).
      */
     @PostMapping("/register")
-    public ResponseEntity<Register> authRegister(@Valid @RequestBody com.grankain.platformapi.auth.dto.request.Register register) {
+    public ResponseEntity<ResponseRegister> authRegister(@Valid @RequestBody RequestRegister register) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(registerService.authRegister(register));
     }
@@ -45,14 +47,16 @@ public class AuthController {
     /**
      * Endpoint para Login de usuários.
      *
-     * @param register DTO contendo os dados do novo usuário. Validado pelo Jakarta Validation (@Valid).
+     * @param login DTO contendo os dados do novo usuário. Validado pelo Jakarta Validation (@Valid).
      * @return ResponseEntity com o DTO de resposta e status HTTP 201 (Created).
      */
 
     @PostMapping("/login")
-    public ResponseEntity<Login> authLogin(@Valid @RequestBody com.grankain.platformapi.auth.dto.request.Login login) {
+    public ResponseEntity<ResponseLogin> authLogin(@Valid @RequestBody RequestLogin login) {
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(loginService.authLogin(login));
+        String ipUser = IpUtil.getClientIp();
+
+        return ResponseEntity.ok(loginService.authLogin(login, ipUser));
     }
 }
 

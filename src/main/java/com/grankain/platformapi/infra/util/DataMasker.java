@@ -15,11 +15,11 @@ public class DataMasker {
      * @param email O Value Object Email original.
      * @return String do e-mail mascarado.
      */
-    public static String maskEmail(Email email) {
+    public static String maskEmail(String email) {
         if (email == null) return null;
 
         // Regex que substitui caracteres entre o segundo caractere e o '@' por '*'.
-        return email.value().replaceAll("(?<=.{2}).(?=.*@)", "*");
+        return email.replaceAll("(?<=.{2}).(?=.*@)", "*");
     }
 }
 

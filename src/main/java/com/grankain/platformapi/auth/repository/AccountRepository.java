@@ -25,7 +25,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
      * Busca uma conta através do e-mail ou nome de usuário.
      * Retorna um Optional, o que obriga o chamador a tratar o caso onde o usuário não é encontrado.
      */
-    Optional<Account> findAccountByEmailOrUser(Email email, Username user);
 
     Optional<Account> findByEmail(Email email);
 

@@ -1,7 +1,6 @@
 package com.grankain.platformapi.auth.domain;
 
 import com.grankain.platformapi.auth.domain.vo.Email;
-import com.grankain.platformapi.auth.domain.vo.Password;
 import com.grankain.platformapi.auth.domain.vo.Username;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -21,7 +20,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "accounts")
 @Getter
-@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true) // use apenas o @Id
 public class Account {
 
@@ -48,16 +46,14 @@ public class Account {
     @AttributeOverride(name = "value", column = @Column(name = "username", nullable = false))
     private Username user;
 
+    @Setter
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING) // Salva o nome da constante do Enum (ex: "PENDING") como String no banco.
     private AccountStatus status;
 
-    // Campo temporário para transporte ou processamento de senha em texto puro (se necessário).
-    @Transient
-    private Password password;
 
     @Column(name = "password", nullable = false)
-    private String encodedPassword;
+    private String hashPassword;
 
     @CreationTimestamp // Preenchido automaticamente pelo Hibernate no momento do INSERT.
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -67,12 +63,15 @@ public class Account {
     @Column(name = "accessed_at", nullable = false)
     private Instant accessedAt;
 
+    @Setter
     @Column(name = "failed_access_counter", nullable = false)
     private int failedAccessCounter;
 
+    @Setter
     @Column(name = "failed_at")
     private Instant failedAt;
 
+    @Setter
     @Column(name = "last_ip")
     private String lastIp;
 
@@ -91,13 +90,13 @@ public class Account {
      * Centraliza a lógica de formatação de nome e data de nascimento.
      */
     public Account(String name, String lastname, Email email, String birthday, Username user,
-                   AccountStatus status, String encodedPassword, UserAccess access) {
+                   AccountStatus status, String hashPassword, UserAccess access) {
         this.fullName = capitalizeFullName(name + " " + lastname);
         this.email = email;
         this.birthday = formatBirthday(birthday);
         this.user = user;
         this.status = status;
-        this.encodedPassword = encodedPassword;
+        this.hashPassword = hashPassword;
         this.access = access;
     }
 
@@ -138,7 +137,7 @@ public class Account {
     /**
      * Converte a String de data recebida da API para o tipo LocalDate do Java.
      */
-    public LocalDate formatBirthday(String birthday) {
+    public static LocalDate formatBirthday(String birthday) {
         return LocalDate.parse(birthday);
     }
 }

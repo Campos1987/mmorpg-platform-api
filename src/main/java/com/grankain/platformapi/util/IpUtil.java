@@ -4,41 +4,28 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 
-public class IpUtil {
+public final class IpUtil {
+
+    // Construtor privado para garantir que a classe utilitária não seja instanciada (SonarQube / Code Smell)
+    private IpUtil() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
 
     public static String getClientIp() {
-        // Pega a requisição HTTP atual do contexto do Spring
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
         if (attributes == null) {
-            return "0.0.0.0"; // Retorno seguro caso seja chamado fora de uma requisição web
+            return "0.0.0.0";
         }
 
         HttpServletRequest request = attributes.getRequest();
 
-        // A mesma lógica de antes
-        String ip = request.getHeader("X-Forwarded-For");
-
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-
-        return ip;
+        /*
+         * ✅ Fonte Primária de Confiança.
+         * Se 'forwarded-headers-strategy: native' estiver ativo e a aplicação estiver atrás
+         * de um Proxy/Gateway configurado corretamente, o getRemoteAddr() retornará o IP real
+         * do cliente de forma segura, descartando cabeçalhos forjados vindos da internet pública.
+         */
+        return request.getRemoteAddr();
     }
 }

@@ -1,13 +1,13 @@
 package com.grankain.platformapi.dashboard.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping("/dashboard")
-public class dashboard {
+public class Dashboard {
 
     @PostMapping("/")
     public ResponseEntity<String> userStart() {
