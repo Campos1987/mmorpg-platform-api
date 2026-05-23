@@ -1,60 +1,155 @@
-# MMORPG Platform API
+# Grankain Platform API
 
-Uma API robusta e escalável para gerenciamento de contas e autenticação em uma plataforma de MMORPG, construída com Java 17+ e Spring Boot 3.
+API REST stateless de autenticação e gerenciamento de contas para plataforma MMORPG (Lineage 2), construída com Java 21 e Spring Boot 3.
 
-## 🚀 Tecnologias
+> **Porta padrão:** `4000` &nbsp;|&nbsp; **Perfis:** `dev`, `prod`
 
-- **Java 21**
-- **Spring Boot 3.4.1**
-- **Spring Data JPA**
-- **Spring Security** (Argon2id Hashing)
-- **MySQL**
-- **Lombok**
-- **Jakarta Validation**
-- **Maven**
+---
+
+## 🚀 Stack Tecnológica
+
+| Tecnologia | Versão | Função |
+|---|---|---|
+| Java (Eclipse Temurin) | 21 (LTS) | Runtime |
+| Spring Boot | 3.5.14 | Framework principal |
+| Spring Security + OAuth2 Resource Server | (via Boot) | Autenticação JWT HS256 |
+| Spring Data JPA + Hibernate | (via Boot) | Persistência |
+| MySQL | 8.0+ | Banco de dados (externo) |
+| Bouncy Castle | 1.84 | Provider Argon2id |
+| Jakarta Validation | (via Boot) | Validação de entrada |
+| Lombok | (via Boot) | Redução de boilerplate |
+| Docker + Docker Compose | — | Containerização multi-stage |
+
+---
 
 ## 🏗️ Arquitetura
 
-O projeto segue os princípios de **Clean Architecture** e **Domain-Driven Design (DDD)**, com forte foco em:
-- **Imutabilidade**: Uso extensivo de `record` e Value Objects.
-- **Segurança**: Criptografia de ponta (Argon2id) e proteção contra exposição de dados (Data Masking).
-- **Testabilidade**: Design focado em Injeção de Dependência via construtor.
+O projeto segue **Domain-Driven Design (DDD)** e **Clean Architecture**:
 
-Para mais detalhes, veja a [Documentação de Arquitetura](documentation/architecture.md).
+```
+com.grankain.platformapi
+├── auth/           → Domínio: entidades, VOs, repositórios, serviços, DTOs
+├── config/         → Configuração explícita do DataSource (MySQL)
+├── infra/          → GlobalExceptionHandler, validações customizadas, DataMasker
+├── security/       → SecurityConfig, PasswordEncoderConfig (Argon2id), TokenGenerator
+└── util/           → IpUtil (extração de IP real via headers de proxy)
+```
 
-## 📂 Estrutura de Documentação
+Padrões aplicados: Constructor Injection, Rich Domain Model, Value Objects (`@Embeddable` Records), DTO Pattern, Repository Pattern, `@ControllerAdvice` centralizado.
 
-- [Arquitetura](documentation/architecture.md): Detalhes sobre camadas e padrões.
-- [Segurança](documentation/security.md): Políticas de autenticação e proteção de dados.
-- [Endpoints da API](documentation/api_endpoints.md): Guia de integração.
+---
+
+## 🔑 Endpoints Principais
+
+| Método | Endpoint | Auth | Descrição |
+|---|---|---|---|
+| `POST` | `/auth/register` | Pública | Registra nova conta |
+| `POST` | `/auth/login` | Pública | Autentica e retorna JWT (1h) |
+| `GET` | `/actuator/health` | Pública | Health check |
+| `GET` | `/posts/**` | Pública | Leitura de posts/eventos |
+| Qualquer | Demais rotas | `Bearer <token>` | Rotas protegidas |
+
+---
 
 ## 🛠️ Como Executar
 
 ### Pré-requisitos
-- Java 21+
-- Maven 3.8+
-- MySQL 8+
 
-### Configuração do Banco de Dados
-Crie um banco de dados chamado `db_login` no MySQL e configure as credenciais no arquivo `src/main/resources/application.yml` ou via variáveis de ambiente:
-- `SPRING_DATASOURCE_LOGIN_URL`
-- `SPRING_DATASOURCE_LOGIN_USERNAME`
-- `SPRING_DATASOURCE_LOGIN_PASSWORD`
+- Docker Engine 24+ e Docker Compose v2
+- Container MySQL (`mysql-l2_game`) rodando na rede Docker `mmorpg-net`
+- *(Opcional)* Java 21+ e Maven para execução local sem Docker
 
-### Rodando a aplicação
+### 1. Configurar variáveis de ambiente
+
 ```bash
-mvn spring-boot:run
+cp .env.example .env
+# Edite o .env com suas credenciais reais
 ```
 
-A API estará disponível em `http://localhost:8080`.
+**Variáveis obrigatórias no `.env`:**
+
+```dotenv
+SPRING_PROFILES_ACTIVE=dev
+
+# Banco de dados (container mysql-l2_game na rede mmorpg-net)
+MYSQL_DATABASE=gk_web_user
+MYSQL_USER=gk_web_user
+MYSQL_PASSWORD=SUA_SENHA
+
+# CORS (URL do frontend)
+CORS_ORIGINS=http://localhost:3000
+```
+
+> ⚠️ O `.env` está no `.gitignore` e **nunca deve ser commitado**.
+> A variável `JWT_SECRET_KEY` deve ser injetada via ambiente — nunca commite chaves secretas.
+
+### 2. Subir com Docker Compose
+
+```bash
+# Build e inicialização
+docker compose up -d --build
+
+# Verificar logs
+docker compose logs -f api
+
+# Health check
+curl http://localhost:4000/actuator/health
+# { "status": "UP" }
+
+# Parar
+docker compose down
+```
+
+### 3. Execução local (sem Docker)
+
+```bash
+export LOGIN_DB_URL=jdbc:mysql://localhost:3306/gk_web_user?useSSL=false&serverTimezone=UTC
+export LOGIN_DB_USER=gk_web_user
+export LOGIN_DB_PASS=SUA_SENHA
+export SPRING_APPLICATION_CORS_ORIGINS=http://localhost:3000
+export JWT_SECRET_KEY=SUA_CHAVE_SECRETA
+
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+---
 
 ## 🧪 Testes
 
-Execute os testes unitários e de integração com:
 ```bash
-mvn test
+# Todos os testes
+./mvnw test
+
+# Classe específica
+./mvnw test -Dtest=EncodedPasswordTest
 ```
+
+---
+
+## 🔒 Segurança
+
+- **Hash de senhas:** Argon2id (60 MB memória, 10 iterações, salt 16 bytes)
+- **JWT:** HS256, expiração de 1 hora, injetado via `JWT_SECRET_KEY`
+- **Brute-force:** bloqueio de conta após 5 falhas; bloqueio por IP após 7 falhas
+- **Headers HTTP:** `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, HSTS em `prod`
+- **Container:** execução com usuário não-root (`appuser`)
+- **Erros:** stack trace e detalhes omitidos em `prod` (hardening)
+
+---
+
+## 📂 Documentação
+
+| Arquivo | Conteúdo |
+|---|---|
+| [`documentation/technical-overview-v2.md`](documentation/technical-overview-v2.md) | Documentação técnica completa (arquitetura, modelagem, segurança, getting started) |
+| [`documentation/api-integration-guide-frontend.md`](documentation/api-integration-guide-frontend.md) | Guia de integração para o time de Frontend (Next.js/TypeScript) com interfaces TS |
+| [`documentation/architecture.md`](documentation/architecture.md) | Visão de camadas e padrões |
+| [`documentation/security.md`](documentation/security.md) | Políticas de autenticação e proteção de dados |
+| [`documentation/api_endpoints.md`](documentation/api_endpoints.md) | Referência rápida de endpoints |
+
+---
 
 ## 📄 Licença
 
 Este projeto é de uso privado. Todos os direitos reservados.
+
