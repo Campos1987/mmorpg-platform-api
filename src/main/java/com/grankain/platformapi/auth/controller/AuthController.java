@@ -41,7 +41,9 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ResponseRegister> authRegister(@Valid @RequestBody RequestRegister register) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(registerService.authRegister(register));
+        String ipUser = IpUtil.getClientIp();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(registerService.authRegister(register, ipUser));
     }
 
     /**

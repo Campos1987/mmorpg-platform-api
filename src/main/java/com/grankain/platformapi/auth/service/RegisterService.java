@@ -1,6 +1,7 @@
 package com.grankain.platformapi.auth.service;
 
 import com.grankain.platformapi.auth.domain.UserAccess;
+import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
 import com.grankain.platformapi.auth.dto.request.RequestRegister;
 import com.grankain.platformapi.auth.dto.response.ResponseRegister;
 import com.grankain.platformapi.auth.domain.Account;
@@ -10,10 +11,13 @@ import com.grankain.platformapi.auth.repository.AccountRepository;
 import com.grankain.platformapi.auth.domain.vo.Email;
 import com.grankain.platformapi.auth.domain.vo.Password;
 import com.grankain.platformapi.auth.domain.vo.Username;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 /**
  * Service responsável pela lógica de registro de novas contas.
@@ -24,11 +28,13 @@ public class RegisterService {
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AccessCounterFailure accessCounterFailure;
 
     // Construtor para injeção de dependências gerenciadas pelo Spring IoC Container.
-    public RegisterService(AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
+    public RegisterService(AccountRepository accountRepository, PasswordEncoder passwordEncoder, AccessCounterFailure accessCounterFailure) {
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
+        this.accessCounterFailure = accessCounterFailure;
     }
 
     /**
@@ -38,8 +44,7 @@ public class RegisterService {
      * @return DTO com os dados da conta criada para retorno à API.
      */
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ResponseRegister authRegister(RequestRegister register) {
-
+    public ResponseRegister authRegister(RequestRegister register, String ipUser) {
 
         // Encapsulamento em Value Objects: Garante que os dados sejam válidos por design.
         Username username = new Username(register.user());
@@ -65,12 +70,16 @@ public class RegisterService {
                 register.birthday(),
                 username,
                 AccountStatus.PENDING,
+                Instant.EPOCH,
                 hash,
                 UserAccess.USER
         );
 
         // Persistência: Salva a nova conta no banco de dados através do JPA.
         accountRepository.save(user);
+
+        // Sucesso no cadastro: reseta o contador de falhas do IP
+        accessCounterFailure.resetIpCounter(ipUser);
 
         // Mapeamento: Converte a entidade de volta para um DTO de resposta (Response).
         return new ResponseRegister(user.getUser().toString(), user.getEmail().toString());

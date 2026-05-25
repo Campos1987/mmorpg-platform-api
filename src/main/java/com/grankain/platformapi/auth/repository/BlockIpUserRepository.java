@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Lock;
 import java.util.Optional;
 
 public interface BlockIpUserRepository extends JpaRepository<BlockIpUser, String> {
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<BlockIpUser> findByIpUser(String ip);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<BlockIpUser> findWithLockByIpUser(String ip);
 }

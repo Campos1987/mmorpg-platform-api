@@ -90,26 +90,17 @@ public class Account {
      * Centraliza a lógica de formatação de nome e data de nascimento.
      */
     public Account(String name, String lastname, Email email, String birthday, Username user,
-                   AccountStatus status, String hashPassword, UserAccess access) {
+                   AccountStatus status, Instant failedAt, String hashPassword, UserAccess access) {
         this.fullName = capitalizeFullName(name + " " + lastname);
         this.email = email;
         this.birthday = formatBirthday(birthday);
         this.user = user;
         this.status = status;
+        this.failedAt = failedAt;
         this.hashPassword = hashPassword;
         this.access = access;
     }
-
-    /**
-     * Construtor de cópia ou projeção.
-     */
-    public Account(Account user) {
-        this.id = user.getId();
-        this.user = user.getUser();
-        this.status = user.getStatus();
-        this.birthday = user.getBirthday();
-        this.accessedAt = user.getAccessedAt();
-    }
+    
 
     /**
      * Formata o nome completo para garantir que cada palavra comece com letra maiúscula.

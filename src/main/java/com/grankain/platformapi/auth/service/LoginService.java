@@ -1,8 +1,6 @@
 package com.grankain.platformapi.auth.service;
 
-
 import com.grankain.platformapi.auth.domain.Account;
-import com.grankain.platformapi.auth.domain.AccountStatus;
 import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
 import com.grankain.platformapi.security.TokenGenerator;
 import com.grankain.platformapi.auth.domain.vo.Email;
@@ -12,7 +10,6 @@ import com.grankain.platformapi.auth.dto.response.ResponseLogin;
 import com.grankain.platformapi.auth.repository.AccountRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +24,6 @@ public class LoginService {
     private final AccessCounterFailure accessCounterFailure;
     private final TokenGenerator tokenGenerator;
 
-
     public LoginService(AccountRepository repository, PasswordEncoder passwordEncoder,
                         AccessCounterFailure accessCounterFailure, TokenGenerator tokenGenerator) {
         this.repository = repository;
@@ -36,45 +32,54 @@ public class LoginService {
         this.tokenGenerator = tokenGenerator;
     }
 
-
     @Transactional
     public ResponseLogin authLogin(RequestLogin login, String ipUser) {
+        // Verifica se o IP está bloqueado temporariamente
+        if (accessCounterFailure.isIpBlocked(ipUser)) {
+            throw new BadCredentialsException("IP address temporarily blocked due to excessive failures.");
+        }
 
-        //Buscamos o usuário dependendo do tipo de input (E-mail ou Username)
-        Optional<Account> userOptional;
-
+        // 2. Busca a conta do usuário
+        Optional<Account> optionalAccount;
         if (login.user().contains("@")) {
-            userOptional = repository.findByEmail(new Email(login.user()));
+            optionalAccount = repository.findByEmail(new Email(login.user()));
         } else {
-            userOptional = repository.findByUser(new Username(login.user()));
+            optionalAccount = repository.findByUser(new Username(login.user()));
         }
 
-
-        //Se o usuário não existir, interrompemos o fluxo com uma exceção
-        if (userOptional.isEmpty()) {
-            accessCounterFailure.blockIp(ipUser);
-            throw new BadCredentialsException("Invalid User");
+        // Se a conta não existe, registramos a falha do IP para evitar
+        if (optionalAccount.isEmpty()) {
+            accessCounterFailure.registerIpFailedAttempt(ipUser);
+            throw new BadCredentialsException("Invalid username or password");
         }
 
-        Account user = userOptional.get();
+        Account user = optionalAccount.get();
 
-        if (user.getStatus() != AccountStatus.ACTIVE && user.getStatus() != AccountStatus.PENDING) {
-            throw new BadCredentialsException("Account user suspended or blocked");
+        // 3. Verifica se a conta está suspensa
+        if (accessCounterFailure.checkAndRestoreAccountSuspension(user)) {
+            accessCounterFailure.registerIpFailedAttempt(ipUser);
+            throw new BadCredentialsException("Account is temporarily suspended.");
         }
 
+        // 4. Valida a senha
         boolean validPassword = passwordEncoder.matches(login.password(), user.getHashPassword());
 
         if (!validPassword) {
-            accessCounterFailure.countFailure(user, ipUser);
-            throw new BadCredentialsException("Invalid User");
+            accessCounterFailure.registerAccountFailedAttempt(user.getId(), ipUser);
+            throw new BadCredentialsException("Invalid username or password");
         }
-        String userToken = tokenGenerator.generate(user);
 
+        // 5. Sucesso no login: zera os contadores e atualiza IP e data
+        accessCounterFailure.resetIpCounter(ipUser);
+        user.setFailedAccessCounter(0);
+        user.setFailedAt(null);
         user.setLastIp(ipUser);
         repository.save(user);
 
+        String userToken = tokenGenerator.generate(user);
 
-        // Retornamos o objeto de sucesso
-        return new ResponseLogin(Instant.now(), userToken);
+        System.out.println(userToken);
+
+        return new ResponseLogin(Instant.now());
     }
 }
