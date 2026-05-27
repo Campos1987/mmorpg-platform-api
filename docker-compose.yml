@@ -27,16 +27,21 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
 
       # Banco Account
-      WEB_DB_URL: jdbc:mysql://l2-web:3306/l2_web
+      WEB_DB_URL: jdbc:mysql://l2-web:3306/l2_web?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       WEB_DB_USER: root
       WEB_DB_PASS: ehc6001
+
+      # Banco Login
+      LOGIN_DB_URL: jdbc:mysql://l2-login:3306/l2_login?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      LOGIN_DB_USER: root
+      LOGIN_DB_PASS: ehc6001
 
       # Origens permitidas no CORS (frontend)
       SPRING_APPLICATION_CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
 
     ports:
       - "4000:4000"
-    
+
     networks:
       - mmorpg-net
 

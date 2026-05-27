@@ -4,14 +4,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
-/**
- * Classe principal que inicia a aplicação Spring Boot.
- *
- * @SpringBootApplication: Uma anotação de conveniência que combina:
- * - @Configuration: Permite registrar beans extras no contexto.
- * - @EnableAutoConfiguration: Ativa o mecanismo de auto-configuração do Spring Boot.
- * - @ComponentScan: Escaneia o pacote atual e subpacotes em busca de componentes (@Service, @RestController, etc).
- */
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class MmorpgPlatformApiApplication {
@@ -24,4 +16,3 @@ public class MmorpgPlatformApiApplication {
     }
 
 }
-
