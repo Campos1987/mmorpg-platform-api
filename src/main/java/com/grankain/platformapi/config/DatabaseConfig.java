@@ -1,9 +1,12 @@
 package com.grankain.platformapi.config;
 
-import jakarta.persistence.EntityManagerFactory;
+import java.util.Objects;
+
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +17,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.sql.DataSource;
+import jakarta.persistence.EntityManagerFactory;
 
 /**
  * Configuração JPA para o banco db-login (autenticação e usuários).
@@ -79,6 +82,9 @@ public class DatabaseConfig {
     public PlatformTransactionManager loginTransactionManager(
             @Qualifier("loginEntityManagerFactory") EntityManagerFactory emf
     ) {
+        // Garante que não é nulo (se for, ele lança o erro na hora com a mensagem)
+        Objects.requireNonNull(emf, "object cannot be null.");
+
         return new JpaTransactionManager(emf);
     }
 }

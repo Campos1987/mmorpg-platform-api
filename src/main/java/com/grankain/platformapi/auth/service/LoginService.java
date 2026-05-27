@@ -1,35 +1,42 @@
 package com.grankain.platformapi.auth.service;
 
-import com.grankain.platformapi.auth.domain.Account;
-import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
-import com.grankain.platformapi.security.TokenGenerator;
-import com.grankain.platformapi.auth.domain.vo.Email;
-import com.grankain.platformapi.auth.domain.vo.Username;
-import com.grankain.platformapi.auth.dto.request.RequestLogin;
-import com.grankain.platformapi.auth.dto.response.ResponseLogin;
-import com.grankain.platformapi.auth.repository.AccountRepository;
+import java.util.Optional;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.Optional;
+import com.grankain.platformapi.auth.domain.Account;
+import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
+import com.grankain.platformapi.auth.domain.login.LoginAttemptService;
+import com.grankain.platformapi.auth.domain.vo.Email;
+import com.grankain.platformapi.auth.domain.vo.Username;
+import com.grankain.platformapi.auth.dto.request.RequestLogin;
+import com.grankain.platformapi.auth.dto.response.ResponseLogin;
+import com.grankain.platformapi.auth.repository.AccountRepository;
+import com.grankain.platformapi.security.TokenGenerator;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class LoginService {
 
     private final AccountRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final AccessCounterFailure accessCounterFailure;
     private final TokenGenerator tokenGenerator;
+    private final LoginAttemptService loginAttemptService;
 
     public LoginService(AccountRepository repository, PasswordEncoder passwordEncoder,
-                        AccessCounterFailure accessCounterFailure, TokenGenerator tokenGenerator) {
+                        AccessCounterFailure accessCounterFailure, TokenGenerator tokenGenerator,
+                    LoginAttemptService loginAttemptService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.accessCounterFailure = accessCounterFailure;
         this.tokenGenerator = tokenGenerator;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Transactional
@@ -49,7 +56,7 @@ public class LoginService {
 
         // Se a conta não existe, registramos a falha do IP para evitar
         if (optionalAccount.isEmpty()) {
-            accessCounterFailure.registerIpFailedAttempt(ipUser);
+            loginAttemptService.registerIpFailedAttempt(ipUser);
             throw new BadCredentialsException("Invalid username or password");
         }
 
@@ -57,7 +64,7 @@ public class LoginService {
 
         // 3. Verifica se a conta está suspensa
         if (accessCounterFailure.checkAndRestoreAccountSuspension(user)) {
-            accessCounterFailure.registerIpFailedAttempt(ipUser);
+            loginAttemptService.registerIpFailedAttempt(ipUser);
             throw new BadCredentialsException("Account is temporarily suspended.");
         }
 
@@ -78,8 +85,9 @@ public class LoginService {
 
         String userToken = tokenGenerator.generate(user);
 
-        System.out.println(userToken);
+        
+        log.info(userToken);
 
-        return new ResponseLogin(Instant.now());
+        return new ResponseLogin(user.getFullName());
     }
 }

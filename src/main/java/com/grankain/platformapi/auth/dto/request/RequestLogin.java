@@ -1,6 +1,5 @@
 package com.grankain.platformapi.auth.dto.request;
 
-import com.grankain.platformapi.infra.validation.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 

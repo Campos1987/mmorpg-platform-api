@@ -79,28 +79,25 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private UserAccess access = UserAccess.USER;
 
-    /**
-     * Construtor padrão (exigido pela especificação JPA).
-     */
-    public Account() {
-    }
 
     /**
-     * Construtor rico para criação de novas contas.
+     * Cria uma conta nova com status e metadados padrão de registro.
      * Centraliza a lógica de formatação de nome e data de nascimento.
      */
-    public Account(String name, String lastname, Email email, String birthday, Username user,
-                   AccountStatus status, Instant failedAt, String hashPassword, UserAccess access) {
-        this.fullName = capitalizeFullName(name + " " + lastname);
-        this.email = email;
-        this.birthday = formatBirthday(birthday);
-        this.user = user;
-        this.status = status;
-        this.failedAt = failedAt;
-        this.hashPassword = hashPassword;
-        this.access = access;
+    public static Account forRegistration(String name, String lastname, Email email, String birthday,
+                                          Username user, String hashPassword) {
+        Account account = new Account();
+        account.fullName = capitalizeFullName(name + " " + lastname);
+        account.email = email;
+        account.birthday = formatBirthday(birthday);
+        account.user = user;
+        account.status = AccountStatus.PENDING;
+        account.failedAt = Instant.EPOCH;
+        account.hashPassword = hashPassword;
+        account.access = UserAccess.USER;
+        return account;
     }
-    
+
 
     /**
      * Formata o nome completo para garantir que cada palavra comece com letra maiúscula.

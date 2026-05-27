@@ -1,0 +1,48 @@
+# =============================================================================
+# docker-compose.yml — mmorpg-platform-api
+#
+# A API conecta ao banco MySQL já existente (mysql-l2_game) via rede mmorpg-net.
+# O banco NÃO é gerenciado por este compose.
+#
+# Pré-requisito:
+#   A rede 'mmorpg-net' e o container 'mysql-l2_game' devem estar rodando.
+#
+# Uso:
+#   Subir a API:       docker compose up -d
+#   Ver logs:          docker compose logs -f api
+#   Parar:             docker compose down
+# =============================================================================
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mmorpg-platform-api:latest
+    container_name: mmorpg-api
+    restart: unless-stopped
+
+    environment:
+      # Perfil Spring ativo (dev | prod)
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+
+      # Banco Account
+      WEB_DB_URL: jdbc:mysql://l2-web:3306/l2_web
+      WEB_DB_USER: root
+      WEB_DB_PASS: ehc6001
+
+      # Origens permitidas no CORS (frontend)
+      SPRING_APPLICATION_CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+
+    ports:
+      - "4000:4000"
+    
+    networks:
+      - mmorpg-net
+
+# ---------------------------------------------------------------------------
+# Rede externa — criada e gerenciada pelo compose do banco (mysql-l2_game)
+# ---------------------------------------------------------------------------
+networks:
+  mmorpg-net:
+    external: true

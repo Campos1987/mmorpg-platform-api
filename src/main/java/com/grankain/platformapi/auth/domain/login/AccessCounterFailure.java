@@ -2,7 +2,6 @@ package com.grankain.platformapi.auth.domain.login;
 
 import com.grankain.platformapi.auth.domain.Account;
 import com.grankain.platformapi.auth.domain.AccountStatus;
-import com.grankain.platformapi.auth.domain.BlockIpUser;
 import com.grankain.platformapi.auth.repository.AccountRepository;
 import com.grankain.platformapi.auth.repository.BlockIpUserRepository;
 import org.springframework.stereotype.Component;
@@ -19,12 +18,17 @@ public class AccessCounterFailure {
     private static final int BLOCK_IP_DURATION_MINUTES = 15;
     private static final int BLOCK_ACC_DURATION_MINUTES = 5;
 
+
     private final AccountRepository accountRepository;
     private final BlockIpUserRepository blockIpUserRepository;
+    private final LoginAttemptService loginAttemptService;
 
-    public AccessCounterFailure(AccountRepository accountRepository, BlockIpUserRepository blockIpUserRepository) {
+    public AccessCounterFailure(AccountRepository accountRepository, BlockIpUserRepository blockIpUserRepository,
+        LoginAttemptService loginAttemptService
+    ) {
         this.accountRepository = accountRepository;
         this.blockIpUserRepository = blockIpUserRepository;
+        this.loginAttemptService = loginAttemptService;
     }
 
     /**
@@ -49,33 +53,6 @@ public class AccessCounterFailure {
                     }
                     return false;
                 }).orElse(false);
-    }
-
-    /**
-     * Registra uma tentativa falha para um IP em uma nova transação.
-     * Utiliza findWithLockByIpUser para garantir consistência em concorrência.
-     */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void registerIpFailedAttempt(String ipUser) {
-        Instant now = Instant.now();
-        BlockIpUser blockIpUser = blockIpUserRepository.findWithLockByIpUser(ipUser)
-                .orElseGet(() -> {
-                    BlockIpUser newBlock = new BlockIpUser();
-                    newBlock.setIpUser(ipUser);
-                    newBlock.setCount(0);
-                    return newBlock;
-                });
-
-        if (blockIpUser.getBlockAt() != null) {
-            Instant unlockTime = blockIpUser.getBlockAt().plus(BLOCK_IP_DURATION_MINUTES, ChronoUnit.MINUTES);
-            if (now.isAfter(unlockTime)) {
-                blockIpUser.setCount(0);
-            }
-        }
-
-        blockIpUser.setCount(blockIpUser.getCount() + 1);
-        blockIpUser.setBlockAt(now);
-        blockIpUserRepository.saveAndFlush(blockIpUser);
     }
 
     /**
@@ -111,6 +88,11 @@ public class AccessCounterFailure {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void registerAccountFailedAttempt(UUID accountId, String ipUser) {
+
+        if (accountId == null) {
+            throw new IllegalArgumentException("The account ID cannot be null.");
+        }
+
         Account user = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found: " + accountId));
 
@@ -125,7 +107,7 @@ public class AccessCounterFailure {
         user.setFailedAt(Instant.now());
         accountRepository.saveAndFlush(user);
 
-        registerIpFailedAttempt(ipUser);
+        loginAttemptService.registerIpFailedAttempt(ipUser);
     }
 
     /**
@@ -133,8 +115,6 @@ public class AccessCounterFailure {
      */
     @Transactional
     public void resetIpCounter(String ipUser) {
-        blockIpUserRepository.findWithLockByIpUser(ipUser).ifPresent(block -> {
-            blockIpUserRepository.deleteById(block.getIpUser());
-        });
+        blockIpUserRepository.findWithLockByIpUser(ipUser).ifPresent(blockIpUserRepository::delete);
     }
 }

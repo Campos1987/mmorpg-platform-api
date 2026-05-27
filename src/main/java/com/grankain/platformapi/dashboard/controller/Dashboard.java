@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/dashboard")
 public class Dashboard {
 
-    @PostMapping("/")
+    @PostMapping("/user/me")
     public ResponseEntity<String> userStart() {
-        return ResponseEntity.ok("Dados confidenciais do sistema.");
+        return ResponseEntity.ok("Hello World");
+        
     }
 }

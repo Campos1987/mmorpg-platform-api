@@ -20,7 +20,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
      */
     Boolean existsByEmailOrUser(Email email, Username user);
 
-
     /**
      * Busca uma conta através do e-mail ou nome de usuário.
      * Retorna um Optional, o que obriga o chamador a tratar o caso onde o usuário não é encontrado.

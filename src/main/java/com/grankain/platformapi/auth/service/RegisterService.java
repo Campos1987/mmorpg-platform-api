@@ -1,23 +1,21 @@
 package com.grankain.platformapi.auth.service;
 
-import com.grankain.platformapi.auth.domain.UserAccess;
-import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
-import com.grankain.platformapi.auth.dto.request.RequestRegister;
-import com.grankain.platformapi.auth.dto.response.ResponseRegister;
-import com.grankain.platformapi.auth.domain.Account;
-import com.grankain.platformapi.auth.domain.AccountStatus;
-import com.grankain.platformapi.auth.exceptions.AccountAlreadyExistsException;
-import com.grankain.platformapi.auth.repository.AccountRepository;
-import com.grankain.platformapi.auth.domain.vo.Email;
-import com.grankain.platformapi.auth.domain.vo.Password;
-import com.grankain.platformapi.auth.domain.vo.Username;
-import org.springframework.security.authentication.BadCredentialsException;
+import java.util.Objects;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import com.grankain.platformapi.auth.domain.Account;
+import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
+import com.grankain.platformapi.auth.domain.vo.Email;
+import com.grankain.platformapi.auth.domain.vo.Password;
+import com.grankain.platformapi.auth.domain.vo.Username;
+import com.grankain.platformapi.auth.dto.request.RequestRegister;
+import com.grankain.platformapi.auth.dto.response.ResponseRegister;
+import com.grankain.platformapi.auth.exceptions.AccountAlreadyExistsException;
+import com.grankain.platformapi.auth.repository.AccountRepository;
 
 /**
  * Service responsável pela lógica de registro de novas contas.
@@ -63,17 +61,17 @@ public class RegisterService {
         String hash = passwordEncoder.encode(password.value());
 
         // Criação da Entidade de Domínio.
-        Account user = new Account(
+        Account user = Account.forRegistration(
                 register.name(),
                 register.lastname(),
                 email,
                 register.birthday(),
                 username,
-                AccountStatus.PENDING,
-                Instant.EPOCH,
-                hash,
-                UserAccess.USER
+                hash
         );
+
+        // Garante que não é nulo (se for, ele lança o erro na hora com a mensagem)
+        Objects.requireNonNull(user, "The Account object cannot be null when attempting to save.");
 
         // Persistência: Salva a nova conta no banco de dados através do JPA.
         accountRepository.save(user);

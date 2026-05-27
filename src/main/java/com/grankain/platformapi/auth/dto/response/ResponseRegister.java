@@ -1,7 +1,5 @@
 package com.grankain.platformapi.auth.dto.response;
 
-import com.grankain.platformapi.auth.domain.Account;
-import com.grankain.platformapi.auth.domain.vo.Email;
 import com.grankain.platformapi.infra.util.DataMasker;
 
 /**

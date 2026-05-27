@@ -24,17 +24,19 @@ import java.util.List;
 
 /**
  * Utiliza @ControllerAdvice para interceptar exceções em todos os @Controllers.
- * Estende ResponseEntityExceptionHandler para herdar tratamentos padrão do Spring MVC.
+ * Estende ResponseEntityExceptionHandler para herdar tratamentos padrão do
+ * Spring MVC.
  */
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    //Flag que determina o nível de exposição de dados com base no perfil ativo.
+    // Flag que determina o nível de exposição de dados com base no perfil ativo.
     private final boolean isDev;
 
     /**
      * Construtor que injeta as configurações de ambiente.
-     * Define 'isDev' como true apenas se o perfil "dev" estiver ativo no application.properties/yml.
+     * Define 'isDev' como true apenas se o perfil "dev" estiver ativo no
+     * application.properties/yml.
      */
     public GlobalExceptionHandler(Environment environment) {
         this.isDev = environment.acceptsProfiles(Profiles.of("dev"));
@@ -47,18 +49,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccountAlreadyExistsException.class)
     public ResponseEntity<ApiErrorException> handleAccountAlreadyExistsException(
             AccountAlreadyExistsException ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         return buildResponse(
                 HttpStatus.CONFLICT,
                 ex.getMessage(),
                 ex,
-                request
-        );
+                request);
     }
 
     /**
-     * Intercepta erros de autenticação do Spring Security (ex: senha errada ou usuário bloqueado).
+     * Intercepta erros de autenticação do Spring Security (ex: senha errada ou
+     * usuário bloqueado).
      * Retorna HTTP 401 (Unauthorized) com a mensagem específica do motivo da falha.
      *
      * @param ex      A exceção de credenciais inválidas capturada.
@@ -68,26 +69,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiErrorException> handleBadCredentialsException(
             BadCredentialsException ex,
-            HttpServletRequest request
-    ) {
-        // Define o status fixo como 401 (Unauthorized), padrão para falhas de login/autenticação
+            HttpServletRequest request) {
+        // Define o status fixo como 401 (Unauthorized), padrão para falhas de
+        // login/autenticação
         HttpStatus status = HttpStatus.UNAUTHORIZED;
 
         // Recupera o texto passado no 'throw new BadCredentialsException("mensagem")',
-        // ou usa a descrição padrão do HTTP 401 caso nenhuma mensagem tenha sido informada.
+        // ou usa a descrição padrão do HTTP 401 caso nenhuma mensagem tenha sido
+        // informada.
         String message = ex.getMessage() != null
                 ? ex.getMessage()
                 : status.getReasonPhrase();
 
-        // Monta e retorna o JSON estruturado respeitando as regras do ambiente (Dev vs Prod)
+        // Monta e retorna o JSON estruturado respeitando as regras do ambiente (Dev vs
+        // Prod)
         return buildResponse(status, message, ex, request);
     }
 
     @ExceptionHandler(DateTimeParseException.class)
     public ResponseEntity<ApiErrorException> handleDateTimeParseException(
             DateTimeParseException ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
         // Mensagem clara e segura para o cliente
@@ -99,8 +101,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiErrorException> handleDataIntegrityViolationException(
             DataIntegrityViolationException ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
 
         // Mensagem genérica segura (fallback)
@@ -113,7 +114,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             String dbMessage = rootCause.getMessage().toLowerCase();
 
             // Mapeamento amigável baseado no nome da constraint ou coluna
-            // (Ajuste "email" e "username" para bater com o nome exato das suas colunas/constraints no banco)
+            // (Ajuste "email" e "username" para bater com o nome exato das suas
+            // colunas/constraints no banco)
             if (dbMessage.contains("email")) {
                 message = "Conflict: This email address is already registered.";
             } else if (dbMessage.contains("username")) {
@@ -126,7 +128,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Intercepta erros do tipo {@link ResponseStatusException}.
-     * Comumente lançada programaticamente via: throw new ResponseStatusException(HttpStatus.NOT_FOUND, "msg").
+     * Comumente lançada programaticamente via: throw new
+     * ResponseStatusException(HttpStatus.NOT_FOUND, "msg").
      *
      * @param ex      Exceção capturada pelo Spring.
      * @param request Dados da requisição original.
@@ -135,8 +138,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorException> statusException(
             ResponseStatusException ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         // Resolve o código HTTP (ex: 404, 500) para garantir que seja um status válido
         HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
 
@@ -144,7 +146,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
-        // Prioriza a mensagem customizada da exceção; caso ausente, usa o nome padrão do status
+        // Prioriza a mensagem customizada da exceção; caso ausente, usa o nome padrão
+        // do status
         String message = ex.getReason() != null
                 ? ex.getReason()
                 : status.getReasonPhrase();
@@ -153,14 +156,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Intercepta erros {@link HttpClientErrorException}, geralmente disparados por clientes
-     * Rest (como o RestTemplate) ao receberem respostas de erro (4xx) de serviços externos.
+     * Intercepta erros {@link HttpClientErrorException}, geralmente disparados por
+     * clientes
+     * Rest (como o RestTemplate) ao receberem respostas de erro (4xx) de serviços
+     * externos.
      */
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<ApiErrorException> httpClientErrorException(
             HttpClientErrorException ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
 
         if (status == null) {
@@ -176,15 +180,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Sobrescreve o tratamento padrão para erros de validação (@Valid).
-     * Este método é chamado quando um DTO falha nas anotações como @NotBlank, @Size ou @ValidPassword.
+     * Este método é chamado quando um DTO falha nas anotações como @NotBlank, @Size
+     * ou @ValidPassword.
      */
-    @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         // Captura a primeira mensagem de erro de validação encontrada
-        // Se quiser listar todos os erros de todos os campos, teria que adaptar o seu ApiErrorException
+        // Se quiser listar todos os erros de todos os campos, teria que adaptar o seu
+        // ApiErrorException
         String errorMessage = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -192,16 +196,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .findFirst()
                 .orElse("Validation failed");
 
-        // Convertemos o WebRequest para HttpServletRequest para usar no seu buildResponse
-        HttpServletRequest servletRequest = ((org.springframework.web.context.request.ServletWebRequest) request).getRequest();
+        // Convertemos o WebRequest para HttpServletRequest para usar no seu
+        // buildResponse
+        HttpServletRequest servletRequest = ((org.springframework.web.context.request.ServletWebRequest) request)
+                .getRequest();
 
         // Usamos o seu método padrão da classe para gerar o JSON de erro
         ApiErrorException errorBody = buildResponse(
                 HttpStatus.BAD_REQUEST,
                 errorMessage,
                 ex,
-                servletRequest
-        ).getBody();
+                servletRequest).getBody();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
     }
@@ -211,14 +216,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * <p>
      * Lógica de Ambiente:
      * - DEV: Retorna detalhes técnicos exaustivos (Stacktrace, URI, Timestamp).
-     * - PROD: Retorna apenas o nome do erro técnico para evitar Information Exposure.
+     * - PROD: Retorna apenas o nome do erro técnico para evitar Information
+     * Exposure.
      */
     private ResponseEntity<ApiErrorException> buildResponse(
             HttpStatus status,
             String message,
             Throwable ex,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         ApiErrorException error;
 
         if (isDev) {
@@ -229,8 +234,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                     status.name(),
                     message,
                     buildFilteredTrace(ex),
-                    request.getRequestURI()
-            );
+                    request.getRequestURI());
         } else {
             // Em produção, os campos são omitidos (null) para segurança (Hardening)
             // Apenas o 'error' (ex: "NOT_FOUND") é enviado.
@@ -240,8 +244,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                     status.name(),
                     null,
                     null,
-                    null
-            );
+                    null);
         }
 
         return ResponseEntity.status(status).body(error);
@@ -249,10 +252,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Processa o StackTrace da exceção para extrair apenas informações relevantes.
-     * Filtra o rastro para remover chamadas internas de bibliotecas e focar na lógica de negócio.
+     * Filtra o rastro para remover chamadas internas de bibliotecas e focar na
+     * lógica de negócio.
      *
      * @param ex A exceção original.
-     * @return Lista de {@link ApiTraceItem} limitada aos primeiros 8 frames do projeto.
+     * @return Lista de {@link ApiTraceItem} limitada aos primeiros 8 frames do
+     *         projeto.
      */
     private List<ApiTraceItem> buildFilteredTrace(Throwable ex) {
         return Arrays.stream(ex.getStackTrace())
@@ -266,8 +271,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         item.getClassName(),
                         item.getFileName(),
                         item.getLineNumber(),
-                        item.getMethodName()
-                ))
+                        item.getMethodName()))
                 .toList();
     }
 }

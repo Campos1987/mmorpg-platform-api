@@ -1,6 +1,5 @@
 package com.grankain.platformapi.infra.util;
 
-import com.grankain.platformapi.auth.domain.vo.Email;
 
 /**
  * Utilitário responsável por mascarar dados sensíveis.

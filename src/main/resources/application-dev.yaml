@@ -3,9 +3,9 @@ spring:
     name: mmorpg-platform-api
   datasource:
     login:
-      url: ${LOGIN_DB_URL:jdbc:mysql://mysql-l2_game:3306/gk_web_user?useSSL=false&serverTimezone=UTC}
-      username: ${LOGIN_DB_USER:gk_web_user}
-      password: ${LOGIN_DB_PASS:Abc1234}
+      url: ${WEB_DB_URL:jdbc:mysql://localhost:3306/l2_web?useSSL=false&serverTimezone=UTC}
+      username: ${WEB_DB_USER:root}
+      password: ${WEB_DB_PASS:ehc6001}
   jpa:
     hibernate:
       ddl-auto: update

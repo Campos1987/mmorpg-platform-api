@@ -1,12 +1,11 @@
 package com.grankain.platformapi.security;
 
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.OctetSequenceKey;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.HstsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -26,12 +26,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-import java.util.List;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 
 /**
  * Configuração de segurança da aplicação (Spring Security).
@@ -74,10 +74,10 @@ public class SecurityConfig {
 
                 // Habilita CORS e diz ao Spring Security para usar o bean CorsConfigurationSource abaixo.
                 // Sem isso, o navegador pode bloquear chamadas do frontend (erro de CORS), especialmente com Authorization header.
-                .cors(cors -> {
+                .cors(cors -> 
                     // A configuração real de CORS está no método corsConfigurationSource().
-                    cors.configurationSource(corsConfigurationSource());
-                })
+                    cors.configurationSource(corsConfigurationSource())
+                )
 
                 // Desabilita CSRF.
                 // CSRF é importante quando você autentica via cookies/sessão (navegador).
@@ -101,8 +101,8 @@ public class SecurityConfig {
 
                         // Libera leitura pública de posts (somente GET).
                         // Isso cobre /posts/events, /posts/news e qualquer outro sub-path em /posts/**.
-                        // Remover /v3/api-docs
-                        .requestMatchers(HttpMethod.GET, "/posts/**", "/error", "/v3/api-docs").permitAll()
+                        // REMOVE Remover /v3/api-docs
+                        .requestMatchers(HttpMethod.GET, "/posts/**", "/error").permitAll()
                         // Libera leitura pública de auth (somente POST).
                         // Isso cobre /auth/register, /auth/login.
                         .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/v3/api-docs").permitAll()
@@ -126,7 +126,7 @@ public class SecurityConfig {
                                 .maxAgeInSeconds(31536000)
                         );
                     } else {
-                        headers.httpStrictTransportSecurity(hsts -> hsts.disable());
+                        headers.httpStrictTransportSecurity(HstsConfig::disable);
                     }
                 })
                 // Aqui está a mágica: Spring intercepta o Bearer token automaticamente
