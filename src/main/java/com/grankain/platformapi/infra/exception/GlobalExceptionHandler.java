@@ -181,9 +181,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
-            org.springframework.http.HttpHeaders headers,
-            org.springframework.http.HttpStatusCode status,
-            org.springframework.web.context.request.WebRequest request
+            HttpServletRequest request
     ) {
         // Captura a primeira mensagem de erro de validação encontrada
         // Se quiser listar todos os erros de todos os campos, teria que adaptar o seu ApiErrorException
