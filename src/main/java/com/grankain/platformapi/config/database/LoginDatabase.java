@@ -1,4 +1,4 @@
-package com.grankain.platformapi.config;
+package com.grankain.platformapi.config.database;
 
 import java.util.Objects;
 
@@ -10,7 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -22,25 +21,19 @@ import jakarta.persistence.EntityManagerFactory;
 /**
  * Configuração JPA para o banco db-login (autenticação e usuários).
  * <p>
- * Define os Beans necessários para conexão, gerenciamento de entidades e transações
+ * Define os Beans necessários para conexão, gerenciamento de entidades e
+ * transações
  * em um banco de dados MySQL dedicado à autenticação.
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(
-        basePackages = "com.grankain.platformapi.auth.repository",
-        entityManagerFactoryRef = "loginEntityManagerFactory",
-        transactionManagerRef = "loginTransactionManager"
-)
-public class DatabaseConfig {
+@EnableJpaRepositories(basePackages = "com.grankain.platformapi.dashboard.repository.login", entityManagerFactoryRef = "loginEntityManagerFactory", transactionManagerRef = "loginTransactionManager")
+public class LoginDatabase {
 
     /**
      * Propriedades de conexão do banco "dbLogin" lidas do application.yaml.
-     *
-     * @Primary: Indica que este é o DataSource principal caso existam outros sem qualificadores.
      */
     @Bean
-    @Primary
     @ConfigurationProperties("spring.datasource.login")
     public DataSourceProperties loginDataSourceProperties() {
         return new DataSourceProperties();
@@ -50,42 +43,32 @@ public class DatabaseConfig {
      * Cria o DataSource específico para o banco de Login.
      */
     @Bean
-    @Primary
     public DataSource loginDataSource() {
         return loginDataSourceProperties().initializeDataSourceBuilder().build();
     }
 
     /**
      * Cria o EntityManagerFactory que vai gerenciar as entidades de autenticação.
-     * O EntityManagerFactory é o "coração" do Hibernate, responsável por gerenciar o ciclo de vida das entidades.
      */
     @Bean
-    @Primary
     public LocalContainerEntityManagerFactoryBean loginEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
-            @Qualifier("loginDataSource") DataSource dataSource
-    ) {
+            @Qualifier("loginDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                // Pacotes escaneados pelo Hibernate em busca de classes anotadas com @Entity.
-                .packages("com.grankain.platformapi.auth.domain")
+                .packages("com.grankain.platformapi.dashboard.domain")
                 .persistenceUnit("LoginPU")
                 .build();
     }
 
     /**
      * Gerenciador de transações associado ao banco de Login.
-     * Garante a atomicidade das operações (Ex: se falhar o salvamento, faz o Rollback).
      */
     @Bean
-    @Primary
     public PlatformTransactionManager loginTransactionManager(
-            @Qualifier("loginEntityManagerFactory") EntityManagerFactory emf
-    ) {
-        // Garante que não é nulo (se for, ele lança o erro na hora com a mensagem)
+            @Qualifier("loginEntityManagerFactory") EntityManagerFactory emf) {
         Objects.requireNonNull(emf, "object cannot be null.");
 
         return new JpaTransactionManager(emf);
     }
 }
-

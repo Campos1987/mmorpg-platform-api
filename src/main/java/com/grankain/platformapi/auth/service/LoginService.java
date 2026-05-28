@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.grankain.platformapi.auth.domain.Account;
 import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
-import com.grankain.platformapi.auth.service.LoginAttemptService;
 import com.grankain.platformapi.auth.domain.vo.Email;
 import com.grankain.platformapi.auth.domain.vo.Username;
 import com.grankain.platformapi.auth.dto.request.LoginRequest;
@@ -30,8 +29,8 @@ public class LoginService {
     private final LoginAttemptService loginAttemptService;
 
     public LoginService(AccountRepository repository, PasswordEncoder passwordEncoder,
-                        AccessCounterFailure accessCounterFailure, TokenGenerator tokenGenerator,
-                    LoginAttemptService loginAttemptService) {
+            AccessCounterFailure accessCounterFailure, TokenGenerator tokenGenerator,
+            LoginAttemptService loginAttemptService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.accessCounterFailure = accessCounterFailure;
@@ -85,7 +84,6 @@ public class LoginService {
 
         String userToken = tokenGenerator.generate(user);
 
-        
         log.info(userToken);
 
         return new LoginResponse(user.getFullName());

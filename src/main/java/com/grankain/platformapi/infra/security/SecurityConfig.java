@@ -38,19 +38,22 @@ import com.nimbusds.jose.proc.SecurityContext;
  * <p>
  * Objetivo geral:
  * - Definir quais endpoints são públicos e quais exigem autenticação.
- * - Configurar a aplicação como "stateless" (sem sessão), pensando em API REST com JWT.
+ * - Configurar a aplicação como "stateless" (sem sessão), pensando em API REST
+ * com JWT.
  * - Configurar CORS para permitir chamadas do frontend no navegador.
  * <p>
  * Observação importante:
- * - No momento está usando HTTP Basic (temporário). Em produção, a ideia é substituir por JWT Bearer.
+ * - No momento está usando HTTP Basic (temporário). Em produção, a ideia é
+ * substituir por JWT Bearer.
  */
 @Configuration
-@EnableMethodSecurity // Habilita anotações como @PreAuthorize / @PostAuthorize nos métodos (controllers/services).
+@EnableMethodSecurity // Habilita anotações como @PreAuthorize / @PostAuthorize nos métodos
+                      // (controllers/services).
 public class SecurityConfig {
 
     private final String originsEnv;
 
-    @Value("${jwt.secret}")
+    @Value("${spring.jwt.secret}")
     private String jwtSecret;
 
     public SecurityConfig(@Value("${spring.application.cors-origins:}") String originsEnv) {
@@ -61,27 +64,31 @@ public class SecurityConfig {
      * Define a "cadeia de filtros" do Spring Security.
      * <p>
      * A SecurityFilterChain é o coração do Spring Security: ela determina
-     * o que acontece com cada requisição HTTP (autenticação, autorização, CORS, CSRF, etc).
+     * o que acontece com cada requisição HTTP (autenticação, autorização, CORS,
+     * CSRF, etc).
      */
     @Bean
     SecurityFilterChain security(HttpSecurity http, Environment environment) throws Exception {
         boolean isProd = environment.acceptsProfiles(Profiles.of("prod"));
         http
                 // Desativa o "request cache".
-                // Em aplicações web com login via formulário, o Spring pode "salvar" a URL original para redirecionar após login.
+                // Em aplicações web com login via formulário, o Spring pode "salvar" a URL
+                // original para redirecionar após login.
                 // Em API REST isso não faz sentido e pode causar comportamentos estranhos.
                 .requestCache(rs -> rs.disable())
 
-                // Habilita CORS e diz ao Spring Security para usar o bean CorsConfigurationSource abaixo.
-                // Sem isso, o navegador pode bloquear chamadas do frontend (erro de CORS), especialmente com Authorization header.
-                .cors(cors -> 
-                    // A configuração real de CORS está no método corsConfigurationSource().
-                    cors.configurationSource(corsConfigurationSource())
-                )
+                // Habilita CORS e diz ao Spring Security para usar o bean
+                // CorsConfigurationSource abaixo.
+                // Sem isso, o navegador pode bloquear chamadas do frontend (erro de CORS),
+                // especialmente com Authorization header.
+                .cors(cors ->
+                // A configuração real de CORS está no método corsConfigurationSource().
+                cors.configurationSource(corsConfigurationSource()))
 
                 // Desabilita CSRF.
                 // CSRF é importante quando você autentica via cookies/sessão (navegador).
-                // Para API stateless com JWT no header Authorization, normalmente CSRF pode ficar desabilitado.
+                // Para API stateless com JWT no header Authorization, normalmente CSRF pode
+                // ficar desabilitado.
                 .csrf(csrf -> csrf.disable())
 
                 // Configura a aplicação como STATELESS (sem sessão HTTP).
@@ -95,7 +102,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // Libera todas as requisições OPTIONS em qualquer rota.
-                        // Importante para CORS: o browser envia um "preflight" (OPTIONS) antes de alguns requests.
+                        // Importante para CORS: o browser envia um "preflight" (OPTIONS) antes de
+                        // alguns requests.
                         // Sem isso, o navegador pode bloquear mesmo que o endpoint real esteja correto.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
@@ -110,8 +118,7 @@ public class SecurityConfig {
                         // Qualquer outro endpoint (PUT/PATCH/DELETE e demais rotas) exige autenticação.
                         // Quando migrar para JWT, aqui significa "tem que mandar Bearer token válido".
                         .requestMatchers(HttpMethod.POST, "/dashboard/**").authenticated()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .headers(headers -> {
                     // X-Content-Type-Options: nos-niff
                     headers.contentTypeOptions(Customizer.withDefaults());
@@ -123,8 +130,7 @@ public class SecurityConfig {
                     if (isProd) {
                         headers.httpStrictTransportSecurity(hsts -> hsts
                                 .includeSubDomains(true)
-                                .maxAgeInSeconds(31536000)
-                        );
+                                .maxAgeInSeconds(31536000));
                     } else {
                         headers.httpStrictTransportSecurity(HstsConfig::disable);
                     }
@@ -140,12 +146,15 @@ public class SecurityConfig {
      * Configuração de CORS.
      * <p>
      * CORS (Cross-Origin Resource Sharing) é uma regra aplicada pelo NAVEGADOR.
-     * Ele decide se o frontend em um domínio/porta (ex.: <a href="http://localhost:3000">...</a>)
-     * pode chamar a API em outro domínio/porta (ex.: <a href="http://localhost:4000">...</a>).
+     * Ele decide se o frontend em um domínio/porta (ex.:
+     * <a href="http://localhost:3000">...</a>)
+     * pode chamar a API em outro domínio/porta (ex.:
+     * <a href="http://localhost:4000">...</a>).
      * <p>
      * Observação:
      * - Postman/curl não sofrem CORS.
-     * - CORS não protege a sua API de ataques diretos; só controla chamadas via navegador.
+     * - CORS não protege a sua API de ataques diretos; só controla chamadas via
+     * navegador.
      */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -153,14 +162,15 @@ public class SecurityConfig {
         // Exemplo:
         // CORS_ALLOWED_ORIGINS="http://localhost:3000,https://meu-front.com"
 
-        // Se a env estiver vazia/nula => lista vazia => nenhuma origem será permitida (bloqueia CORS no browser).
+        // Se a env estiver vazia/nula => lista vazia => nenhuma origem será permitida
+        // (bloqueia CORS no browser).
         // Se estiver definida => separa por vírgula e limpa espaços.
         List<String> allowedOrigins = (originsEnv == null || originsEnv.isBlank())
                 ? List.of()
                 : Arrays.stream(originsEnv.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .toList();
+                        .map(String::trim)
+                        .filter(s -> !s.isBlank())
+                        .toList();
 
         CorsConfiguration config = new CorsConfiguration();
 
@@ -170,8 +180,9 @@ public class SecurityConfig {
         // Define quais métodos o browser pode usar em requisições cross-origin.
         // ATENÇÃO:
         // - Se futuramente você criar PUT/PATCH/DELETE e quiser chamar do frontend,
-        //   precisa adicionar aqui também.
-        // - O OPTIONS é usado no preflight (mas você liberou o OPTIONS no SecurityFilterChain).
+        // precisa adicionar aqui também.
+        // - O OPTIONS é usado no preflight (mas você liberou o OPTIONS no
+        // SecurityFilterChain).
         config.setAllowedMethods(List.of("GET", "POST"));
 
         // Define quais headers o browser pode enviar na requisição.
@@ -182,13 +193,16 @@ public class SecurityConfig {
 
         // Define quais headers o frontend pode LER na resposta.
         // Por padrão o browser esconde muitos headers da resposta.
-        // Exemplo de uso: se você devolver o token no header Authorization em algum fluxo.
+        // Exemplo de uso: se você devolver o token no header Authorization em algum
+        // fluxo.
         // Observação: muitos projetos devolvem o token no corpo JSON, não no header.
         config.setExposedHeaders(List.of("Authorization"));
 
-        // Se false: não permite enviar cookies/credenciais em cross-origin (credentials: 'include').
+        // Se false: não permite enviar cookies/credenciais em cross-origin
+        // (credentials: 'include').
         // Como a ideia é usar JWT no header Authorization, geralmente fica false mesmo.
-        // Só mude para true se você realmente for usar cookies no futuro (e aí precisa revisar CSRF também).
+        // Só mude para true se você realmente for usar cookies no futuro (e aí precisa
+        // revisar CSRF também).
         config.setAllowCredentials(false);
 
         // Cache do preflight no navegador (em segundos).
