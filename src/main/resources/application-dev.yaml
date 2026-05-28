@@ -13,8 +13,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  jwt:
+    secret: ${JWT_SECRET_KEY:8fK2vW9xZ4mQ7tN1sJ5cR3vF8xY0eU2iO6pW1bE9zAs=}
+
 server:
   port: 4000
 
-jwt:
-  secret: ${JWT_SECRET_KEY:8fK2vW9xZ4mQ7tN1sJ5cR3vF8xY0eU2iO6pW1bE9zAs=}

@@ -14,7 +14,7 @@ import java.util.List;
  * @param trace     Lista de frames da stacktrace (apenas em ambiente de DEV).
  * @param path      URL que foi acessada e gerou o erro.
  */
-public record ApiErrorException(
+public record ApiErrorResponse(
         Instant timestamp,
         Integer status,
         String error,

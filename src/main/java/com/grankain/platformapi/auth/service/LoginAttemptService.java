@@ -1,4 +1,4 @@
-package com.grankain.platformapi.auth.domain.login;
+package com.grankain.platformapi.auth.service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

@@ -1,26 +1,9 @@
 {
-  "groups": [
-    {
-      "name": "spring.datasource.web",
-      "type": "org.springframework.boot.autoconfigure.jdbc.DataSourceProperties",
-      "description": "Configurações de conexão para o banco de dados Web."
-    },
-    {
-      "name": "spring.datasource.login",
-      "type": "org.springframework.boot.autoconfigure.jdbc.DataSourceProperties",
-      "description": "Configurações de conexão para o banco de dados Login."
-    },
-    {
-      "name": "jwt",
-      "type": "java.lang.Object",
-      "description": "Configurações de token JWT da aplicação."
-    }
-  ],
   "properties": [
     {
-      "name": "jwt.secret",
+      "name": "spring.jwt.secret",
       "type": "java.lang.String",
-      "description": "Segredo HMAC-SHA256 usado para assinar e validar tokens JWT."
+      "description": "A description for 'spring.jwt.secret'"
     }
   ]
 }

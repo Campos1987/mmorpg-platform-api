@@ -4,6 +4,7 @@ import com.grankain.platformapi.auth.domain.Account;
 import com.grankain.platformapi.auth.domain.AccountStatus;
 import com.grankain.platformapi.auth.repository.AccountRepository;
 import com.grankain.platformapi.auth.repository.BlockIpUserRepository;
+import com.grankain.platformapi.auth.service.LoginAttemptService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

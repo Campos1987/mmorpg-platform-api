@@ -1,4 +1,4 @@
-package com.grankain.platformapi.security;
+package com.grankain.platformapi.infra.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

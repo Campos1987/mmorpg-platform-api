@@ -1,7 +1,7 @@
 package com.grankain.platformapi.infra.exception;
 
 import com.grankain.platformapi.auth.exceptions.AccountAlreadyExistsException;
-import com.grankain.platformapi.infra.exception.dto.ApiErrorException;
+import com.grankain.platformapi.infra.exception.dto.ApiErrorResponse;
 import com.grankain.platformapi.infra.exception.dto.ApiTraceItem;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.env.Environment;
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * Retorna HTTP 409 (Conflict).
      */
     @ExceptionHandler(AccountAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorException> handleAccountAlreadyExistsException(
+    public ResponseEntity<ApiErrorResponse> handleAccountAlreadyExistsException(
             AccountAlreadyExistsException ex,
             HttpServletRequest request) {
         return buildResponse(
@@ -64,10 +64,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      *
      * @param ex      A exceção de credenciais inválidas capturada.
      * @param request Dados da requisição original.
-     * @return Resposta padronizada conforme o DTO ApiErrorException.
+     * @return Resposta padronizada conforme o DTO ApiErrorResponse.
      */
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiErrorException> handleBadCredentialsException(
+    public ResponseEntity<ApiErrorResponse> handleBadCredentialsException(
             BadCredentialsException ex,
             HttpServletRequest request) {
         // Define o status fixo como 401 (Unauthorized), padrão para falhas de
@@ -87,7 +87,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(DateTimeParseException.class)
-    public ResponseEntity<ApiErrorException> handleDateTimeParseException(
+    public ResponseEntity<ApiErrorResponse> handleDateTimeParseException(
             DateTimeParseException ex,
             HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -99,7 +99,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiErrorException> handleDataIntegrityViolationException(
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolationException(
             DataIntegrityViolationException ex,
             HttpServletRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
@@ -133,10 +133,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      *
      * @param ex      Exceção capturada pelo Spring.
      * @param request Dados da requisição original.
-     * @return Resposta padronizada conforme o DTO ApiErrorException.
+     * @return Resposta padronizada conforme o DTO ApiErrorResponse.
      */
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiErrorException> statusException(
+    public ResponseEntity<ApiErrorResponse> statusException(
             ResponseStatusException ex,
             HttpServletRequest request) {
         // Resolve o código HTTP (ex: 404, 500) para garantir que seja um status válido
@@ -162,7 +162,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * externos.
      */
     @ExceptionHandler(HttpClientErrorException.class)
-    public ResponseEntity<ApiErrorException> httpClientErrorException(
+    public ResponseEntity<ApiErrorResponse> httpClientErrorException(
             HttpClientErrorException ex,
             HttpServletRequest request) {
         HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
@@ -188,7 +188,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpServletRequest request) {
         // Captura a primeira mensagem de erro de validação encontrada
         // Se quiser listar todos os erros de todos os campos, teria que adaptar o seu
-        // ApiErrorException
+        // ApiErrorResponse
         String errorMessage = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -202,7 +202,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .getRequest();
 
         // Usamos o seu método padrão da classe para gerar o JSON de erro
-        ApiErrorException errorBody = buildResponse(
+        ApiErrorResponse errorBody = buildResponse(
                 HttpStatus.BAD_REQUEST,
                 errorMessage,
                 ex,
@@ -219,16 +219,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * - PROD: Retorna apenas o nome do erro técnico para evitar Information
      * Exposure.
      */
-    private ResponseEntity<ApiErrorException> buildResponse(
+    private ResponseEntity<ApiErrorResponse> buildResponse(
             HttpStatus status,
             String message,
             Throwable ex,
             HttpServletRequest request) {
-        ApiErrorException error;
+        ApiErrorResponse error;
 
         if (isDev) {
             // Em ambiente de desenvolvimento, provê rastro completo para depuração rápida
-            error = new ApiErrorException(
+            error = new ApiErrorResponse(
                     Instant.now(),
                     status.value(),
                     status.name(),
@@ -238,7 +238,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         } else {
             // Em produção, os campos são omitidos (null) para segurança (Hardening)
             // Apenas o 'error' (ex: "NOT_FOUND") é enviado.
-            error = new ApiErrorException(
+            error = new ApiErrorResponse(
                     null,
                     null,
                     status.name(),

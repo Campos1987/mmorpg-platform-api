@@ -27,11 +27,7 @@ import jakarta.persistence.EntityManagerFactory;
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(
-        basePackages = "com.grankain.platformapi.dashboard.repository.login",
-        entityManagerFactoryRef = "loginEntityManagerFactory",
-        transactionManagerRef = "loginTransactionManager"
-)
+@EnableJpaRepositories(basePackages = "com.grankain.platformapi.dashboard.repository.login", entityManagerFactoryRef = "loginEntityManagerFactory", transactionManagerRef = "loginTransactionManager")
 public class LoginDatabase {
 
     /**
@@ -76,4 +72,3 @@ public class LoginDatabase {
         return new JpaTransactionManager(emf);
     }
 }
-
