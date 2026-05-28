@@ -2,10 +2,14 @@ spring:
   application:
     name: mmorpg-platform-api
   datasource:
-    login:
+    web:
       url: ${WEB_DB_URL:jdbc:mysql://localhost:3306/l2_web?useSSL=false&serverTimezone=UTC}
       username: ${WEB_DB_USER:root}
       password: ${WEB_DB_PASS:ehc6001}
+    login:
+      url: ${LOGIN_DB_URL:jdbc:mysql://localhost:3306/l2_login?useSSL=false&serverTimezone=UTC}
+      username: ${LOGIN_DB_USER:root}
+      password: ${LOGIN_DB_PASS:ehc6001}
   jpa:
     hibernate:
       ddl-auto: update

@@ -12,8 +12,8 @@ import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
 import com.grankain.platformapi.auth.domain.vo.Email;
 import com.grankain.platformapi.auth.domain.vo.Password;
 import com.grankain.platformapi.auth.domain.vo.Username;
-import com.grankain.platformapi.auth.dto.request.RequestRegister;
-import com.grankain.platformapi.auth.dto.response.ResponseRegister;
+import com.grankain.platformapi.auth.dto.request.RegisterRequest;
+import com.grankain.platformapi.auth.dto.response.RegisterResponse;
 import com.grankain.platformapi.auth.exceptions.AccountAlreadyExistsException;
 import com.grankain.platformapi.auth.repository.AccountRepository;
 
@@ -42,7 +42,7 @@ public class RegisterService {
      * @return DTO com os dados da conta criada para retorno à API.
      */
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ResponseRegister authRegister(RequestRegister register, String ipUser) {
+    public RegisterResponse authRegister(RegisterRequest register, String ipUser) {
 
         // Encapsulamento em Value Objects: Garante que os dados sejam válidos por design.
         Username username = new Username(register.user());
@@ -80,7 +80,7 @@ public class RegisterService {
         accessCounterFailure.resetIpCounter(ipUser);
 
         // Mapeamento: Converte a entidade de volta para um DTO de resposta (Response).
-        return new ResponseRegister(user.getUser().toString(), user.getEmail().toString());
+        return new RegisterResponse(user.getUser().toString(), user.getEmail().toString());
     }
 }
 

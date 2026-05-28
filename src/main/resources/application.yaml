@@ -2,6 +2,11 @@ spring:
   application:
     name: mmorpg-platform-api
   datasource:
+    web:
+      url: ${WEB_DB_URL}
+      username: ${WEB_DB_USER}
+      password: ${WEB_DB_PASS}
+      driver-class-name: com.mysql.cj.jdbc.Driver
     login:
       url: ${LOGIN_DB_URL}
       username: ${LOGIN_DB_USER}
@@ -14,11 +19,6 @@ spring:
 server:
   port: 4000
   forward-headers-strategy: native
-
-custom:
-  security:
-    regexp:
-      user-name: "^[a-zA-Z0-9]+$"
 
 jwt:
   secret: ${JWT_SECRET_KEY}

@@ -11,7 +11,7 @@ import jakarta.validation.constraints.*;
  * As anotações do 'jakarta.validation' permitem validar os dados antes mesmo
  * de eles chegarem à camada de Service.
  */
-public record RequestRegister(
+public record RegisterRequest(
         @NotBlank(message = "Username é obrigatório")
         @ValidUser // Validação customizada definida no pacote 'infra.validation'.
         String user,

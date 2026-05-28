@@ -1,4 +1,4 @@
-package com.grankain.platformapi.util;
+package com.grankain.platformapi.infra.util;
 
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;

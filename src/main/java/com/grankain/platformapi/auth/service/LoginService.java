@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.grankain.platformapi.auth.domain.Account;
 import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
-import com.grankain.platformapi.auth.domain.login.LoginAttemptService;
+import com.grankain.platformapi.auth.service.LoginAttemptService;
 import com.grankain.platformapi.auth.domain.vo.Email;
 import com.grankain.platformapi.auth.domain.vo.Username;
-import com.grankain.platformapi.auth.dto.request.RequestLogin;
-import com.grankain.platformapi.auth.dto.response.ResponseLogin;
+import com.grankain.platformapi.auth.dto.request.LoginRequest;
+import com.grankain.platformapi.auth.dto.response.LoginResponse;
 import com.grankain.platformapi.auth.repository.AccountRepository;
-import com.grankain.platformapi.security.TokenGenerator;
+import com.grankain.platformapi.infra.security.TokenGenerator;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +40,7 @@ public class LoginService {
     }
 
     @Transactional
-    public ResponseLogin authLogin(RequestLogin login, String ipUser) {
+    public LoginResponse authLogin(LoginRequest login, String ipUser) {
         // Verifica se o IP está bloqueado temporariamente
         if (accessCounterFailure.isIpBlocked(ipUser)) {
             throw new BadCredentialsException("IP address temporarily blocked due to excessive failures.");
@@ -88,6 +88,6 @@ public class LoginService {
         
         log.info(userToken);
 
-        return new ResponseLogin(user.getFullName());
+        return new LoginResponse(user.getFullName());
     }
 }

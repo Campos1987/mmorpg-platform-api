@@ -1,4 +1,4 @@
-package com.grankain.platformapi.security;
+package com.grankain.platformapi.infra.security;
 
 import com.grankain.platformapi.auth.domain.Account;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;

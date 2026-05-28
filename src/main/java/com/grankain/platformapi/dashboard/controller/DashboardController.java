@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/dashboard")
-public class Dashboard {
+public class DashboardController {
 
     @PostMapping("/user/me")
     public ResponseEntity<String> userStart() {

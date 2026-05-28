@@ -1,4 +1,4 @@
-package com.grankain.platformapi.security;
+package com.grankain.platformapi.infra.security;
 
 import java.util.Arrays;
 import java.util.List;
