@@ -27,7 +27,7 @@ import jakarta.persistence.EntityManagerFactory;
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.grankain.platformapi.dashboard.repository.login", entityManagerFactoryRef = "loginEntityManagerFactory", transactionManagerRef = "loginTransactionManager")
+@EnableJpaRepositories(basePackages = "com.grankain.platformapi.gamer.repository", entityManagerFactoryRef = "loginEntityManagerFactory", transactionManagerRef = "loginTransactionManager")
 public class LoginDatabase {
 
     /**
@@ -56,7 +56,7 @@ public class LoginDatabase {
             @Qualifier("loginDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.grankain.platformapi.dashboard.domain")
+                .packages("com.grankain.platformapi.gamer.domain")
                 .persistenceUnit("LoginPU")
                 .build();
     }
