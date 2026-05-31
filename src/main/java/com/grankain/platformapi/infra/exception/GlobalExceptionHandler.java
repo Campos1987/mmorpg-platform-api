@@ -1,6 +1,5 @@
 package com.grankain.platformapi.infra.exception;
 
-import com.grankain.platformapi.auth.exceptions.AccountAlreadyExistsException;
 import com.grankain.platformapi.user.exceptions.UserAlreadyExistsException;
 import com.grankain.platformapi.gamer.exceptions.GameAccountNotFoundException;
 import com.grankain.platformapi.infra.exception.dto.ApiErrorResponse;
@@ -48,17 +47,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * Intercepta a exceção de domínio quando um usuário ou e-mail já estão em uso.
      * Retorna HTTP 409 (Conflict).
      */
-    @ExceptionHandler(AccountAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorResponse> handleAccountAlreadyExistsException(
-            AccountAlreadyExistsException ex,
-            HttpServletRequest request) {
-        return buildResponse(
-                HttpStatus.NOT_FOUND,
-                ex.getMessage(),
-                ex,
-                request);
-    }
-
     /**
      * Intercepta a exceção de domínio do contexto 'user' quando um usuário ou e-mail já estão em uso.
      * Retorna HTTP 409 (Conflict).

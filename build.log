@@ -1,0 +1,318 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.grankain:platform-api:jar:0.0.1-SNAPSHOT
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.springframework.boot:spring-boot-configuration-processor:jar -> duplicate declaration of version (?) @ line 117, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ---------------------< com.grankain:platform-api >----------------------
+[INFO] Building mmorpg-platform-api 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ platform-api ---
+[INFO] Deleting /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ platform-api ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ platform-api ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 39 source files with javac [debug parameters release 21] to target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[11,59] cannot access com.grankain.platformapi.dashboard.repository.login.AccountRepository
+  bad source file: /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/repository/login/AccountRepository.java
+    file does not contain class com.grankain.platformapi.dashboard.repository.login.AccountRepository
+    Please remove or make sure it appears in the correct subdirectory of the sourcepath.
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/repository/login/AccountRepository.java:[10,8] interface GameAccountRepository is public, should be declared in a file named GameAccountRepository.java
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[19,19] cannot find symbol
+  symbol:   class AccountRepository
+  location: class com.grankain.platformapi.dashboard.service.GamerAccountService
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[21,32] cannot find symbol
+  symbol:   class AccountRepository
+  location: class com.grankain.platformapi.dashboard.service.GamerAccountService
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/RegisterService.java:[83,41] cannot find symbol
+  symbol:   method getUser()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/RegisterService.java:[83,68] cannot find symbol
+  symbol:   method getEmail()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[71,79] cannot find symbol
+  symbol:   method getHashPassword()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[74,67] cannot find symbol
+  symbol:   method getId()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[80,13] cannot find symbol
+  symbol:   method setFailedAccessCounter(int)
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[81,13] cannot find symbol
+  symbol:   method setFailedAt(<nulltype>)
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[82,13] cannot find symbol
+  symbol:   method setLastIp(java.lang.String)
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[87,9] cannot find symbol
+  symbol:   variable log
+  location: class com.grankain.platformapi.auth.service.LoginService
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[89,38] cannot find symbol
+  symbol:   method getFullName()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[43,30] cannot find symbol
+  symbol:   method getCount()
+  location: variable block of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[45,34] cannot find symbol
+  symbol:   method getBlockAt()
+  location: variable block of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[48,51] cannot find symbol
+  symbol:   method getBlockAt()
+  location: variable block of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[64,17] cannot find symbol
+  symbol:   method getStatus()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[68,17] cannot find symbol
+  symbol:   method getFailedAt()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[73,34] cannot find symbol
+  symbol:   method getFailedAt()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[76,17] cannot find symbol
+  symbol:   method setStatus(com.grankain.platformapi.auth.domain.AccountStatus)
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[77,17] cannot find symbol
+  symbol:   method setFailedAt(java.time.Instant)
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[78,17] cannot find symbol
+  symbol:   method setFailedAccessCounter(int)
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[100,17] cannot find symbol
+  symbol:   method getFailedAccessCounter()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[101,45] cannot find symbol
+  symbol:   method getFailedAccessCounter()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[104,17] cannot find symbol
+  symbol:   method getFailedAccessCounter()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[105,17] cannot find symbol
+  symbol:   method setStatus(com.grankain.platformapi.auth.domain.AccountStatus)
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[108,13] cannot find symbol
+  symbol:   method setFailedAt(java.time.Instant)
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/infra/security/TokenGenerator.java:[29,47] cannot find symbol
+  symbol:   method getAccess()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/infra/security/TokenGenerator.java:[28,30] cannot find symbol
+  symbol:   method getId()
+  location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[31,29] cannot find symbol
+  symbol:   method setIpUser(java.lang.String)
+  location: variable newBlock of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[32,29] cannot find symbol
+  symbol:   method setCount(int)
+  location: variable newBlock of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[36,24] cannot find symbol
+  symbol:   method getBlockAt()
+  location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[37,45] cannot find symbol
+  symbol:   method getBlockAt()
+  location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[39,28] cannot find symbol
+  symbol:   method setCount(int)
+  location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[43,41] cannot find symbol
+  symbol:   method getCount()
+  location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[44,20] cannot find symbol
+  symbol:   method setBlockAt(java.time.Instant)
+  location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[28,24] cannot find symbol
+  symbol:   method getUser()
+  location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[29,24] cannot find symbol
+  symbol:   method getFullName()
+  location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[30,24] cannot find symbol
+  symbol:   method getEmail()
+  location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[31,24] cannot find symbol
+  symbol:   method getBirthday()
+  location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[32,24] cannot find symbol
+  symbol:   method getCreatedAt()
+  location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[33,24] cannot find symbol
+  symbol:   method getAccessedAt()
+  location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[34,24] cannot find symbol
+  symbol:   method getStatus()
+  location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[35,9] cannot find symbol
+  symbol:   variable log
+  location: class com.grankain.platformapi.dashboard.service.GamerAccountService
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[35,33] cannot find symbol
+  symbol:   method getLogin()
+  location: class com.grankain.platformapi.dashboard.domain.Accounts
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[37,31] cannot find symbol
+  symbol:   method getLogin()
+  location: class com.grankain.platformapi.dashboard.domain.Accounts
+[INFO] 46 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.053 s
+[INFO] Finished at: 2026-05-28T18:28:57-03:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.1:compile (default-compile) on project platform-api: Compilation failure: Compilation failure: 
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[11,59] cannot access com.grankain.platformapi.dashboard.repository.login.AccountRepository
+[ERROR]   bad source file: /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/repository/login/AccountRepository.java
+[ERROR]     file does not contain class com.grankain.platformapi.dashboard.repository.login.AccountRepository
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the sourcepath.
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/repository/login/AccountRepository.java:[10,8] interface GameAccountRepository is public, should be declared in a file named GameAccountRepository.java
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[19,19] cannot find symbol
+[ERROR]   symbol:   class AccountRepository
+[ERROR]   location: class com.grankain.platformapi.dashboard.service.GamerAccountService
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[21,32] cannot find symbol
+[ERROR]   symbol:   class AccountRepository
+[ERROR]   location: class com.grankain.platformapi.dashboard.service.GamerAccountService
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/RegisterService.java:[83,41] cannot find symbol
+[ERROR]   symbol:   method getUser()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/RegisterService.java:[83,68] cannot find symbol
+[ERROR]   symbol:   method getEmail()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[71,79] cannot find symbol
+[ERROR]   symbol:   method getHashPassword()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[74,67] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[80,13] cannot find symbol
+[ERROR]   symbol:   method setFailedAccessCounter(int)
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[81,13] cannot find symbol
+[ERROR]   symbol:   method setFailedAt(<nulltype>)
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[82,13] cannot find symbol
+[ERROR]   symbol:   method setLastIp(java.lang.String)
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[87,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.grankain.platformapi.auth.service.LoginService
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginService.java:[89,38] cannot find symbol
+[ERROR]   symbol:   method getFullName()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[43,30] cannot find symbol
+[ERROR]   symbol:   method getCount()
+[ERROR]   location: variable block of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[45,34] cannot find symbol
+[ERROR]   symbol:   method getBlockAt()
+[ERROR]   location: variable block of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[48,51] cannot find symbol
+[ERROR]   symbol:   method getBlockAt()
+[ERROR]   location: variable block of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[64,17] cannot find symbol
+[ERROR]   symbol:   method getStatus()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[68,17] cannot find symbol
+[ERROR]   symbol:   method getFailedAt()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[73,34] cannot find symbol
+[ERROR]   symbol:   method getFailedAt()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[76,17] cannot find symbol
+[ERROR]   symbol:   method setStatus(com.grankain.platformapi.auth.domain.AccountStatus)
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[77,17] cannot find symbol
+[ERROR]   symbol:   method setFailedAt(java.time.Instant)
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[78,17] cannot find symbol
+[ERROR]   symbol:   method setFailedAccessCounter(int)
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[100,17] cannot find symbol
+[ERROR]   symbol:   method getFailedAccessCounter()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[101,45] cannot find symbol
+[ERROR]   symbol:   method getFailedAccessCounter()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[104,17] cannot find symbol
+[ERROR]   symbol:   method getFailedAccessCounter()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[105,17] cannot find symbol
+[ERROR]   symbol:   method setStatus(com.grankain.platformapi.auth.domain.AccountStatus)
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/domain/login/AccessCounterFailure.java:[108,13] cannot find symbol
+[ERROR]   symbol:   method setFailedAt(java.time.Instant)
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/infra/security/TokenGenerator.java:[29,47] cannot find symbol
+[ERROR]   symbol:   method getAccess()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/infra/security/TokenGenerator.java:[28,30] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable user of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[31,29] cannot find symbol
+[ERROR]   symbol:   method setIpUser(java.lang.String)
+[ERROR]   location: variable newBlock of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[32,29] cannot find symbol
+[ERROR]   symbol:   method setCount(int)
+[ERROR]   location: variable newBlock of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[36,24] cannot find symbol
+[ERROR]   symbol:   method getBlockAt()
+[ERROR]   location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[37,45] cannot find symbol
+[ERROR]   symbol:   method getBlockAt()
+[ERROR]   location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[39,28] cannot find symbol
+[ERROR]   symbol:   method setCount(int)
+[ERROR]   location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[43,41] cannot find symbol
+[ERROR]   symbol:   method getCount()
+[ERROR]   location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/auth/service/LoginAttemptService.java:[44,20] cannot find symbol
+[ERROR]   symbol:   method setBlockAt(java.time.Instant)
+[ERROR]   location: variable blockIpUser of type com.grankain.platformapi.auth.domain.BlockIpUser
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[28,24] cannot find symbol
+[ERROR]   symbol:   method getUser()
+[ERROR]   location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[29,24] cannot find symbol
+[ERROR]   symbol:   method getFullName()
+[ERROR]   location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[30,24] cannot find symbol
+[ERROR]   symbol:   method getEmail()
+[ERROR]   location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[31,24] cannot find symbol
+[ERROR]   symbol:   method getBirthday()
+[ERROR]   location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[32,24] cannot find symbol
+[ERROR]   symbol:   method getCreatedAt()
+[ERROR]   location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[33,24] cannot find symbol
+[ERROR]   symbol:   method getAccessedAt()
+[ERROR]   location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/UserAccountService.java:[34,24] cannot find symbol
+[ERROR]   symbol:   method getStatus()
+[ERROR]   location: variable account of type com.grankain.platformapi.auth.domain.Account
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[35,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.grankain.platformapi.dashboard.service.GamerAccountService
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[35,33] cannot find symbol
+[ERROR]   symbol:   method getLogin()
+[ERROR]   location: class com.grankain.platformapi.dashboard.domain.Accounts
+[ERROR] /home/ewerton-campos/Documentos/Projetos/L2/mmorpg-platform-api/src/main/java/com/grankain/platformapi/dashboard/service/GamerAccountService.java:[37,31] cannot find symbol
+[ERROR]   symbol:   method getLogin()
+[ERROR]   location: class com.grankain.platformapi.dashboard.domain.Accounts
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
