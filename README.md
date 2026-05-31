@@ -29,7 +29,8 @@ O projeto segue **Domain-Driven Design (DDD)** e **Clean Architecture**:
 ```
 com.grankain.platformapi
 ├── auth/           → Domínio: entidades, VOs, repositórios, serviços, DTOs
-├── dashboard/      → Domínio da área logada: contas do jogo (Accounts), perfil e integrações
+├── user/               → Bounded context: conta da plataforma web, perfil e configurações
+├── gamer/              → Bounded context: contas in-game do Lineage 2
 ├── config/         → Configuração explícita do DataSource (MySQL)
 ├── infra/          → GlobalExceptionHandler, validações customizadas, DataMasker
 ├── security/       → SecurityConfig, PasswordEncoderConfig (Argon2id), TokenGenerator

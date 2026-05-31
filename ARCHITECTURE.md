@@ -37,8 +37,9 @@ flowchart LR
 
 | Domínio | Responsabilidade | Status |
 |---|---|---|
-| **Auth** | Registro, login, emissão/validação JWT, brute-force | Implementado |
-| **Dashboard** | Endpoints protegidos para área autenticada | Stub inicial |
+| **Auth** | Login, registro de novos usuários, segurança básica | Implementado |
+| **User** | Gerenciamento de perfil e dados da conta da plataforma web | Implementado |
+| **Gamer** | Gerenciamento de contas in-game do Lineage 2 | Implementado |
 | **Infra** | Erros padronizados, validações customizadas, mascaramento | Implementado |
 | **Security** | Spring Security, CORS, Argon2id, headers defensivos | Implementado |
 
@@ -56,7 +57,7 @@ flowchart LR
 
 O projeto adota um **monólito modular** com fronteiras inspiradas em **Clean Architecture** e **Domain-Driven Design (DDD)**:
 
-- **Domínio rico:** regras de negócio em entidades e componentes de domínio (`Account`, `AccessCounterFailure`).
+- **Domínio rico:** regras de negócio em entidades e componentes de domínio (`PlatformUser`, `AccessCounterFailure`).
 - **Camadas explícitas:** controller → service (aplicação) → repository (infraestrutura de persistência).
 - **Fronteira via DTOs:** entidades JPA nunca são expostas diretamente na API.
 - **Value Objects embarcados:** `Email`, `Username` e `Password` como Records `@Embeddable`.
@@ -75,7 +76,8 @@ flowchart TB
     end
 
     subgraph Domínio
-        ACC[Account]
+        PU[PlatformUser]
+        GA[GameAccount]
         ACF[AccessCounterFailure]
         VO[Value Objects]
     end
@@ -112,25 +114,29 @@ com.grankain.platformapi
 │
 ├── auth/                          # Bounded context: autenticação
 │   ├── controller/                # Entry points HTTP
-│   ├── domain/                    # Entidades, enums, VOs, lógica de domínio
-│   │   ├── login/
-│   │   │   └── AccessCounterFailure.java
-│   │   └── vo/
+│    ├── domain/                    # BlockIpUser, AccessCounterFailure
 │   ├── dto/                       # Contratos request/response da API
-│   ├── exceptions/                # Exceções de domínio
+│   ├── exceptions/                # Exceções de login/auth
 │   ├── repository/                # Spring Data JPA
-│   └── service/                   # Casos de uso (orquestração)
+│   └── service/                   # Casos de uso (Login, Register)
 │
-├── dashboard/                     # Bounded context: área autenticada
-│   ├── controller/                # DashboardController
-│   ├── domain/                    # Entidade Accounts (Contas in-game)
-│   ├── dto/                       # FindAccountResponse, etc.
-│   ├── exceptions/                # Exceções específicas do painel
+├── user/                          # Bounded context: conta da plataforma web
+│   ├── controller/                # UserController
+│   ├── domain/                    # PlatformUser, Value Objects, Enums
+│   ├── dto/                       # Requests/Responses de perfil
+│   ├── exceptions/                # Exceções de domínio (UserAlreadyExists, etc)
+│   ├── repository/                # PlatformUserRepository
+│   └── service/                   # PlatformUserService
+│
+├── gamer/                         # Bounded context: contas do jogo L2
+│   ├── controller/                # GamerAccountController
+│   ├── domain/                    # GameAccount
+│   ├── exceptions/                # Exceções de jogo (GameAccountNotFound, etc)
 │   ├── repository/                # GameAccountRepository
-│   └── service/                   # UserAccountService, GamerAccountService
+│   └── service/                   # GamerAccountService
 │
 ├── config/
-│   └── DatabaseConfig.java        # DataSource e JPA do banco de login
+│   ├── database/                  # WebDatabase e LoginDatabase Configs
 │
 ├── infra/                         # Cross-cutting de infraestrutura
 │   ├── exception/                 # GlobalExceptionHandler + DTOs de erro
@@ -150,7 +156,7 @@ com.grankain.platformapi
 
 | Aspecto | Convenção |
 |---|---|
-| Entidade raiz | `Account` (aggregate root do contexto auth) |
+| Entidade raiz | `PlatformUser` (aggregate root do contexto user) |
 | Persistência | `ddl-auto: validate` — schema gerenciado externamente |
 | Transações | `@Transactional` nos services; `REQUIRES_NEW` em contadores de falha |
 | Erros | `GlobalExceptionHandler` com hardening em profile `prod` |
@@ -162,7 +168,7 @@ com.grankain.platformapi
 
 ### 4.1 Entidades
 
-#### `accounts` — Aggregate Root
+#### `accounts` (`PlatformUser`) — Aggregate Root da Web
 
 | Campo | Tipo | Observação |
 |---|---|---|
@@ -180,7 +186,7 @@ com.grankain.platformapi
 | `last_ip` | `String` | Último IP de acesso bem-sucedido |
 | `access` | `UserAccess` | `USER`, `ADM`, `MODERATOR` |
 
-#### `Accounts` — Entidade de Contas do Jogo (Game Database)
+#### `accounts` (`GameAccount`) — Entidade de Contas do Jogo (Game Database)
 
 | Campo | Tipo | Observação |
 |---|---|---|
@@ -211,8 +217,8 @@ As tabelas **não possuem FK entre si**. Bloqueio por conta e por IP são mecani
 ### 4.3 Persistência
 
 - **Banco:** MySQL (`gk_web_user`), container externo `mysql-l2_game`.
-- **Configuração:** `DatabaseConfig` define `loginDataSource`, `loginEntityManagerFactory` (PU: `LoginPU`) e `loginTransactionManager`.
-- **Repositórios:** escaneados em `com.grankain.platformapi.auth.repository`.
+- **Configuração:** `LoginDatabase` e `WebDatabase` definem transações e EntityManagerFactories separadas para `db-login` e `db-web`.
+- **Repositórios:** isolados nos pacotes `user.repository` e `gamer.repository`.
 - **Lock pessimista:** `BlockIpUserRepository.findWithLockByIpUser` para concorrência em contadores de IP.
 
 ---
@@ -457,7 +463,6 @@ Itens identificados no código atual que impactam a arquitetura:
 | Módulo `/posts/**` liberado sem implementação | Superfície de API incompleta | Baixa |
 | `springdoc-openapi` com comentário "Remover" | Dependência transitória desnecessária | Baixa |
 | `documentation/security.md` desatualizado (menciona HTTP Basic) | Documentação divergente | Baixa |
-| Reúso de `AccountAlreadyExistsException` | Uso semântico incorreto para cenário "Account not found" em `GamerAccountService` | Alta |
 
 ### Roadmap arquitetural
 

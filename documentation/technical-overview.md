@@ -82,15 +82,22 @@ com.grankain.platformapi
 │       ├── LoginService.java
 │       └── RegisterService.java
 │
-├── dashboard/                     ← Domínio de gestão da conta logada
+├── user/                          ← Domínio da conta na plataforma web
 │   ├── controller/
-│   │   └── DashboardController.java
-│   ├── domain/
-│   │   └── Accounts.java          ← Integração com Contas In-game
+│   │   └── UserController.java
+│   ├── domain/                    ← PlatformUser
+│   ├── repository/
+│   │   └── PlatformUserRepository.java
+│   └── service/
+│       └── PlatformUserService.java
+│
+├── gamer/                         ← Domínio das contas in-game do L2
+│   ├── controller/
+│   │   └── GamerAccountController.java
+│   ├── domain/                    ← GameAccount
 │   ├── repository/
 │   │   └── GameAccountRepository.java
 │   └── service/
-│       ├── UserAccountService.java
 │       └── GamerAccountService.java
 │
 ├── config/
@@ -125,7 +132,7 @@ com.grankain.platformapi
 | **Rich Domain Model** | `Account` centraliza a lógica de formatação de nome e data de nascimento |
 | **Value Objects (VO)** | `Email`, `Username` e `Password` são Java Records `@Embeddable` com validação no construtor compacto |
 | **DTO Pattern** | Entidades JPA nunca são expostas nos controllers; `RequestRegister`, `ResponseLogin` etc. formam a fronteira pública |
-| **Repository Pattern** | `AccountRepository` e `BlockIpUserRepository` são interfaces Spring Data JPA |
+| **Repository Pattern** | `PlatformUserRepository` e `BlockIpUserRepository` são interfaces Spring Data JPA |
 | **@ControllerAdvice** | `GlobalExceptionHandler` centraliza todo o tratamento de erro, com comportamento diferenciado por profile (`dev` vs `prod`) |
 | **Explicit `@Bean`** | `PasswordEncoderConfig`, `SecurityConfig` e `DatabaseConfig` declaram beans explicitamente, sem "Spring magic" implícito |
 | **Multi-stage Docker Build** | Estágio `build` usa JDK Alpine completo; estágio `runtime` usa apenas JRE Alpine, minimizando a superfície de ataque da imagem final |
