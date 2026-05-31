@@ -5,7 +5,11 @@ package com.grankain.platformapi.infra.util;
  * Utilitário responsável por mascarar dados sensíveis.
  * Técnica importante para conformidade com LGPD/GDPR, evitando expor dados pessoais (PII).
  */
-public class DataMasker {
+public final class DataMasker {
+
+    private DataMasker() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
 
     /**
      * Mascara um endereço de e-mail, ocultando parte dos caracteres.

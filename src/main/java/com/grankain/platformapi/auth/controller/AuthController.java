@@ -1,5 +1,12 @@
 package com.grankain.platformapi.auth.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.grankain.platformapi.auth.dto.request.LoginRequest;
 import com.grankain.platformapi.auth.dto.request.RegisterRequest;
 import com.grankain.platformapi.auth.dto.response.LoginResponse;
@@ -7,13 +14,8 @@ import com.grankain.platformapi.auth.dto.response.RegisterResponse;
 import com.grankain.platformapi.auth.service.LoginService;
 import com.grankain.platformapi.auth.service.RegisterService;
 import com.grankain.platformapi.infra.util.IpUtil;
+
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller responsável pelas operações de autenticação e registro de

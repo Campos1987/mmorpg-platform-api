@@ -27,7 +27,6 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
      * Retorna um Optional, o que obriga o chamador a tratar o caso onde o usuário
      * não é encontrado.
      */
-
     Optional<Account> findByEmail(Email email);
 
     Optional<Account> findByUser(Username user);

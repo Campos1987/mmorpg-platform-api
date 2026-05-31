@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             AccountAlreadyExistsException ex,
             HttpServletRequest request) {
         return buildResponse(
-                HttpStatus.CONFLICT,
+                HttpStatus.NOT_FOUND,
                 ex.getMessage(),
                 ex,
                 request);

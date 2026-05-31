@@ -29,6 +29,7 @@ O projeto segue **Domain-Driven Design (DDD)** e **Clean Architecture**:
 ```
 com.grankain.platformapi
 ├── auth/           → Domínio: entidades, VOs, repositórios, serviços, DTOs
+├── dashboard/      → Domínio da área logada: contas do jogo (Accounts), perfil e integrações
 ├── config/         → Configuração explícita do DataSource (MySQL)
 ├── infra/          → GlobalExceptionHandler, validações customizadas, DataMasker
 ├── security/       → SecurityConfig, PasswordEncoderConfig (Argon2id), TokenGenerator

@@ -82,6 +82,17 @@ com.grankain.platformapi
 │       ├── LoginService.java
 │       └── RegisterService.java
 │
+├── dashboard/                     ← Domínio de gestão da conta logada
+│   ├── controller/
+│   │   └── DashboardController.java
+│   ├── domain/
+│   │   └── Accounts.java          ← Integração com Contas In-game
+│   ├── repository/
+│   │   └── GameAccountRepository.java
+│   └── service/
+│       ├── UserAccountService.java
+│       └── GamerAccountService.java
+│
 ├── config/
 │   └── DatabaseConfig.java        ← Configuração explícita do DataSource MySQL
 │
@@ -297,8 +308,8 @@ Todas as exceções são capturadas pelo `GlobalExceptionHandler` e retornam o s
 ```json
 {
   "timestamp": "2026-05-23T03:01:00Z",
-  "status": 409,
-  "error": "CONFLICT",
+  "status": 404,
+  "error": "NOT_FOUND",
   "message": "Usuário ou e-mail já em uso.",
   "trace": [
     {
@@ -318,7 +329,7 @@ Todas as exceções são capturadas pelo `GlobalExceptionHandler` e retornam o s
 {
   "timestamp": null,
   "status": null,
-  "error": "CONFLICT",
+  "error": "NOT_FOUND",
   "message": null,
   "trace": null,
   "path": null
@@ -331,7 +342,7 @@ Todas as exceções são capturadas pelo `GlobalExceptionHandler` e retornam o s
 
 | Exceção | HTTP Status | Cenário |
 |---|---|---|
-| `AccountAlreadyExistsException` | `409 Conflict` | E-mail ou username já cadastrados |
+| `AccountAlreadyExistsException` | `404 Not Found` | E-mail/username já cadastrados ou Conta do Jogo Inexistente |
 | `BadCredentialsException` | `401 Unauthorized` | Senha incorreta, conta suspensa/banida, IP bloqueado |
 | `MethodArgumentNotValidException` | `400 Bad Request` | Falha nas validações Jakarta Bean Validation (`@Valid`) |
 | `DateTimeParseException` | `400 Bad Request` | Data de nascimento em formato inválido |

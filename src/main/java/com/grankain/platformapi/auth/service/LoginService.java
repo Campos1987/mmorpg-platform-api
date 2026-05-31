@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.grankain.platformapi.auth.domain.Account;
+import com.grankain.platformapi.auth.domain.AccountStatus;
 import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
 import com.grankain.platformapi.auth.domain.vo.Email;
 import com.grankain.platformapi.auth.domain.vo.Username;
@@ -45,7 +46,7 @@ public class LoginService {
             throw new BadCredentialsException("IP address temporarily blocked due to excessive failures.");
         }
 
-        // 2. Busca a conta do usuário
+        // Busca a conta do usuário
         Optional<Account> optionalAccount;
         if (login.user().contains("@")) {
             optionalAccount = repository.findByEmail(new Email(login.user()));
@@ -61,13 +62,13 @@ public class LoginService {
 
         Account user = optionalAccount.get();
 
-        // 3. Verifica se a conta está suspensa
+        // Verifica se a conta está suspensa
         if (accessCounterFailure.checkAndRestoreAccountSuspension(user)) {
             loginAttemptService.registerIpFailedAttempt(ipUser);
             throw new BadCredentialsException("Account is temporarily suspended.");
         }
 
-        // 4. Valida a senha
+        // Valida a senha
         boolean validPassword = passwordEncoder.matches(login.password(), user.getHashPassword());
 
         if (!validPassword) {
@@ -75,17 +76,22 @@ public class LoginService {
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        // 5. Sucesso no login: zera os contadores e atualiza IP e data
-        accessCounterFailure.resetIpCounter(ipUser);
-        user.setFailedAccessCounter(0);
-        user.setFailedAt(null);
-        user.setLastIp(ipUser);
-        repository.save(user);
+        String userToken = null;
+        if(user.getStatus() == AccountStatus.ACTIVE) {
+            //Sucesso no login: zera os contadores e atualiza IP e data
+            accessCounterFailure.resetIpCounter(ipUser);
+            user.setFailedAccessCounter(0);
+            user.setFailedAt(null);
+            user.setLastIp(ipUser);
+            repository.save(user);
 
-        String userToken = tokenGenerator.generate(user);
+            userToken = tokenGenerator.generate(user);
 
-        log.info(userToken);
+            log.info(userToken);
+        }else{
+            throw new BadCredentialsException(user.getStatus().name());
+        }
 
-        return new LoginResponse(user.getFullName());
+        return new LoginResponse(userToken);
     }
 }

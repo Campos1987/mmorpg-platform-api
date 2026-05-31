@@ -121,8 +121,13 @@ com.grankain.platformapi
 │   ├── repository/                # Spring Data JPA
 │   └── service/                   # Casos de uso (orquestração)
 │
-├── dashboard/                     # Bounded context: área autenticada (inicial)
-│   └── controller/
+├── dashboard/                     # Bounded context: área autenticada
+│   ├── controller/                # DashboardController
+│   ├── domain/                    # Entidade Accounts (Contas in-game)
+│   ├── dto/                       # FindAccountResponse, etc.
+│   ├── exceptions/                # Exceções específicas do painel
+│   ├── repository/                # GameAccountRepository
+│   └── service/                   # UserAccountService, GamerAccountService
 │
 ├── config/
 │   └── DatabaseConfig.java        # DataSource e JPA do banco de login
@@ -174,6 +179,16 @@ com.grankain.platformapi
 | `failed_at` | `Instant` | Timestamp da última falha |
 | `last_ip` | `String` | Último IP de acesso bem-sucedido |
 | `access` | `UserAccess` | `USER`, `ADM`, `MODERATOR` |
+
+#### `Accounts` — Entidade de Contas do Jogo (Game Database)
+
+| Campo | Tipo | Observação |
+|---|---|---|
+| `login` | `String` | PK (`Id`), sincronizado com account principal |
+| `account_id` | `UUID` | Vínculo com a tabela `accounts` de auth |
+| `password` | `String` | Hash do jogo |
+| `created_time` | `String` | Data de criação local do jogo |
+| `lastactive` | `String` | Última atividade in-game |
 
 #### `block_ip_user` — Controle de brute-force por IP
 
@@ -442,6 +457,7 @@ Itens identificados no código atual que impactam a arquitetura:
 | Módulo `/posts/**` liberado sem implementação | Superfície de API incompleta | Baixa |
 | `springdoc-openapi` com comentário "Remover" | Dependência transitória desnecessária | Baixa |
 | `documentation/security.md` desatualizado (menciona HTTP Basic) | Documentação divergente | Baixa |
+| Reúso de `AccountAlreadyExistsException` | Uso semântico incorreto para cenário "Account not found" em `GamerAccountService` | Alta |
 
 ### Roadmap arquitetural
 

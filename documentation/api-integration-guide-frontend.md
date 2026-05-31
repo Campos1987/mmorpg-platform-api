@@ -277,7 +277,7 @@ export function getErrorMessage(apiError: ApiError): string {
 |-----------------------------|-------------------------|----------------------------------------------------------------------------|
 | `400 Bad Request`           | `BAD_REQUEST`           | Campo obrigatório ausente, formato inválido, data incorreta                |
 | `401 Unauthorized`          | `UNAUTHORIZED`          | Credenciais inválidas, conta suspensa/banida, IP bloqueado, token expirado |
-| `409 Conflict`              | `CONFLICT`              | E-mail ou username já cadastrado                                           |
+| `404 Not Found`             | `NOT_FOUND`             | E-mail ou username já cadastrado / Conta Inexistente                       |
 | `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` | Erro inesperado no servidor                                                |
 
 ---
@@ -364,13 +364,13 @@ Accept: application/json
 
 ---
 
-**`409 Conflict` — E-mail ou username já cadastrado:**
+**`404 Not Found` — E-mail ou username já cadastrado / Não encontrado:**
 
 ```json
 {
   "timestamp": "2026-05-23T03:05:10Z",
-  "status": 409,
-  "error": "CONFLICT",
+  "status": 404,
+  "error": "NOT_FOUND",
   "message": "Usuário ou e-mail já em uso.",
   "trace": [],
   "path": "/auth/register"
@@ -695,4 +695,5 @@ export function isApiError(value: unknown): value is ApiError {
 | `POST`   | `/auth/login`      | Pública                    | Autentica e retorna JWT              |
 | `GET`    | `/actuator/health` | Pública                    | Health check do servidor             |
 | `GET`    | `/posts/**`        | Pública                    | Leitura de posts, eventos e notícias |
+| `POST`   | `/dashboard/user/me`| `Bearer token` obrigatório | Retorna os dados do perfil logado    |
 | Qualquer | Demais rotas       | `Bearer token` obrigatório | Rotas protegidas exigem JWT válido   |

@@ -1,21 +1,33 @@
 package com.grankain.platformapi.auth.domain;
 
-import com.grankain.platformapi.auth.domain.vo.Email;
-import com.grankain.platformapi.auth.domain.vo.Username;
-import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.grankain.platformapi.auth.domain.vo.Email;
+import com.grankain.platformapi.auth.domain.vo.Username;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Entidade JPA que representa uma conta de usuário no banco de dados.
- * Segue o padrão de Modelo Rico, onde a entidade possui comportamento e lógica de domínio.
+ * Segue o padrão de Modelo Rico, onde a entidade possui comportamento e lógica
+ * de domínio.
  */
 @Entity
 @Table(name = "accounts")
@@ -31,15 +43,17 @@ public class Account {
     private String fullName;
 
     /**
-     * @Embedded: O Spring Data JPA irá "achatá-lo" e incluir seus campos na tabela 'accounts'.
-     * @AttributeOverride: Permite customizar o nome da coluna do Value Object nesta tabela específica.
+     * @Embedded: O Spring Data JPA irá "achatá-lo" e incluir seus campos na tabela
+     *            'accounts'.
+     * @AttributeOverride: Permite customizar o nome da coluna do Value Object nesta
+     *                     tabela específica.
      */
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email",
-            nullable = false, unique = true))
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false, unique = true))
     private Email email;
 
-    @Column(name = "birthday", nullable = false)
+    @Setter
+    @Column(name = "birthday")
     private LocalDate birthday;
 
     @Embedded
@@ -50,7 +64,6 @@ public class Account {
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING) // Salva o nome da constante do Enum (ex: "PENDING") como String no banco.
     private AccountStatus status;
-
 
     @Column(name = "password", nullable = false)
     private String hashPassword;
@@ -79,17 +92,15 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private UserAccess access = UserAccess.USER;
 
-
     /**
      * Cria uma conta nova com status e metadados padrão de registro.
      * Centraliza a lógica de formatação de nome e data de nascimento.
      */
-    public static Account forRegistration(String name, String lastname, Email email, String birthday,
-                                          Username user, String hashPassword) {
+    public static Account forRegistration(String name, String lastname, Email email,
+            Username user, String hashPassword) {
         Account account = new Account();
         account.fullName = capitalizeFullName(name + " " + lastname);
         account.email = email;
-        account.birthday = formatBirthday(birthday);
         account.user = user;
         account.status = AccountStatus.PENDING;
         account.failedAt = Instant.EPOCH;
@@ -98,9 +109,9 @@ public class Account {
         return account;
     }
 
-
     /**
-     * Formata o nome completo para garantir que cada palavra comece com letra maiúscula.
+     * Formata o nome completo para garantir que cada palavra comece com letra
+     * maiúscula.
      * Exemplo: "joão silva" -> "João Silva"
      */
     public static String capitalizeFullName(String fullName) {
@@ -129,4 +140,3 @@ public class Account {
         return LocalDate.parse(birthday);
     }
 }
-

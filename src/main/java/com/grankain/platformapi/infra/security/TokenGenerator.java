@@ -1,11 +1,15 @@
 package com.grankain.platformapi.infra.security;
 
-import com.grankain.platformapi.auth.domain.Account;
+import java.time.Instant;
+
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
+import com.grankain.platformapi.auth.domain.Account;
 
 @Component
 public class TokenGenerator {
@@ -24,7 +28,7 @@ public class TokenGenerator {
                 .issuer("mmorpg-l2-api")
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiry))
-                .subject(user.getId().toString()) // Username ou ID
+                .subject(user.getId().toString()) // ID
                 .claim("scope", "ROLE_" + user.getAccess().name())
                 .build();
 

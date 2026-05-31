@@ -28,8 +28,10 @@ public class RegisterService {
     private final PasswordEncoder passwordEncoder;
     private final AccessCounterFailure accessCounterFailure;
 
-    // Construtor para injeção de dependências gerenciadas pelo Spring IoC Container.
-    public RegisterService(AccountRepository accountRepository, PasswordEncoder passwordEncoder, AccessCounterFailure accessCounterFailure) {
+    // Construtor para injeção de dependências gerenciadas pelo Spring IoC
+    // Container.
+    public RegisterService(AccountRepository accountRepository, PasswordEncoder passwordEncoder,
+            AccessCounterFailure accessCounterFailure) {
         this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
         this.accessCounterFailure = accessCounterFailure;
@@ -44,7 +46,8 @@ public class RegisterService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public RegisterResponse authRegister(RegisterRequest register, String ipUser) {
 
-        // Encapsulamento em Value Objects: Garante que os dados sejam válidos por design.
+        // Encapsulamento em Value Objects: Garante que os dados sejam válidos por
+        // design.
         Username username = new Username(register.user());
         Email email = new Email(register.email());
         Password password = new Password(register.password());
@@ -56,7 +59,8 @@ public class RegisterService {
             throw new AccountAlreadyExistsException("Usuário ou e-mail já em uso.");
         }
 
-        // Criptografia: Gera o Hash da senha utilizando o algoritmo configurado (ex: Argon2/BCrypt).
+        // Criptografia: Gera o Hash da senha utilizando o algoritmo configurado (ex:
+        // Argon2/BCrypt).
         // Nunca salve senhas em texto puro!
         String hash = passwordEncoder.encode(password.value());
 
@@ -65,10 +69,8 @@ public class RegisterService {
                 register.name(),
                 register.lastname(),
                 email,
-                register.birthday(),
                 username,
-                hash
-        );
+                hash);
 
         // Garante que não é nulo (se for, ele lança o erro na hora com a mensagem)
         Objects.requireNonNull(user, "The Account object cannot be null when attempting to save.");
@@ -83,5 +85,3 @@ public class RegisterService {
         return new RegisterResponse(user.getUser().toString(), user.getEmail().toString());
     }
 }
-
-
