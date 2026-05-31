@@ -19,14 +19,15 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Controller responsável pelos endpoints de gerenciamento do perfil do usuário autenticado.
+ * Controller responsável pelos endpoints de gerenciamento do perfil do usuário
+ * autenticado.
  * <p>
  * O path base {@code /dashboard/user} é mantido para garantir compatibilidade
  * com o frontend existente sem exigir alterações imediatas de URL.
  */
 @Slf4j
 @RestController
-@RequestMapping("/dashboard/user")
+@RequestMapping("/user")
 public class UserController {
 
     private final PlatformUserService platformUserService;
@@ -51,7 +52,8 @@ public class UserController {
      * Registra a data de nascimento do usuário autenticado.
      * Só pode ser definida uma vez — regra aplicada no domínio (PlatformUser).
      *
-     * @param jwt            Token JWT extraído automaticamente pelo Spring Security.
+     * @param jwt             Token JWT extraído automaticamente pelo Spring
+     *                        Security.
      * @param birthdayRequest DTO com a data de nascimento a ser registrada.
      * @return {@code true} se a operação foi bem-sucedida.
      */

@@ -15,14 +15,15 @@ import io.micrometer.common.lang.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Controller responsável pelos endpoints relacionados às contas de jogo do Lineage 2.
+ * Controller responsável pelos endpoints relacionados às contas de jogo do
+ * Lineage 2.
  * <p>
  * Opera sobre o banco de dados do emulador ({@code db-login}) através do
  * {@link GamerAccountService}, totalmente isolado do banco da plataforma web.
  */
 @Slf4j
 @RestController
-@RequestMapping("/dashboard/gamer")
+@RequestMapping("/gamer")
 public class GamerAccountController {
 
     private final GamerAccountService gamerAccountService;

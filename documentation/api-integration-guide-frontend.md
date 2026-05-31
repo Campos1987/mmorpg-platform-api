@@ -159,7 +159,7 @@ import type {NextRequest} from 'next/server';
 
 export function middleware(request: NextRequest) {
     const token = request.cookies.get('auth_token');
-    const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard');
+    const isProtectedRoute = request.nextUrl.pathname.startsWith('/user') || request.nextUrl.pathname.startsWith('/gamer');
 
     if (isProtectedRoute && !token) {
         return NextResponse.redirect(new URL('/login', request.url));
@@ -695,5 +695,7 @@ export function isApiError(value: unknown): value is ApiError {
 | `POST`   | `/auth/login`      | Pública                    | Autentica e retorna JWT              |
 | `GET`    | `/actuator/health` | Pública                    | Health check do servidor             |
 | `GET`    | `/posts/**`        | Pública                    | Leitura de posts, eventos e notícias |
-| `POST`   | `/dashboard/user/me`| `Bearer token` obrigatório | Retorna os dados do perfil logado    |
+| `POST`   | `/user/me`         | `Bearer token` obrigatório | Retorna os dados do perfil logado    |
+| `POST`   | `/user/setBirthday`| `Bearer token` obrigatório | Salva a data de nascimento do logado |
+| `GET`    | `/gamer/account`   | `Bearer token` obrigatório | Retorna a conta de jogo vinculada    |
 | Qualquer | Demais rotas       | `Bearer token` obrigatório | Rotas protegidas exigem JWT válido   |

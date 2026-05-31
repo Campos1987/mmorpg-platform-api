@@ -117,8 +117,8 @@ public class SecurityConfig {
 
                         // Qualquer outro endpoint (PUT/PATCH/DELETE e demais rotas) exige autenticação.
                         // Quando migrar para JWT, aqui significa "tem que mandar Bearer token válido".
-                        .requestMatchers(HttpMethod.POST, "/dashboard/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/dashboard/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/user/**", "/gamer/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/user/**", "/gamer/**").authenticated()
                         .anyRequest().authenticated())
                 .headers(headers -> {
                     // X-Content-Type-Options: nos-niff

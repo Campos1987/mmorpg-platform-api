@@ -66,8 +66,8 @@ O projeto adota um **monólito modular** com fronteiras inspiradas em **Clean Ar
 ```mermaid
 flowchart TB
     subgraph Apresentação
-        AC[AuthController]
-        DC[Dashboard]
+        UC[UserController]
+        GC[GamerAccountController]
     end
 
     subgraph Aplicação
@@ -101,7 +101,7 @@ flowchart TB
     REPO --> DB
     LS --> TG
     RS --> PE
-    AC & DC --> GEH
+    AC & UC & GC --> GEH
     SC --> TG
 ```
 
@@ -339,7 +339,7 @@ scope : "ROLE_USER" | "ROLE_ADM" | "ROLE_MODERATOR"
 | `/auth/register`, `/auth/login` | POST | Público |
 | `/posts/**` | GET | Público (reservado para módulo futuro) |
 | `/v3/api-docs`, `/error` | GET/POST | Público |
-| `/dashboard/**` | POST | Autenticado (Bearer JWT) |
+| `/user/**`, `/gamer/**` | GET/POST | Autenticado (Bearer JWT) |
 | Demais rotas | * | Autenticado |
 | `OPTIONS /**` | OPTIONS | Público (preflight CORS) |
 
@@ -471,7 +471,7 @@ Itens identificados no código atual que impactam a arquitetura:
 3. **Refresh token** — rotação de tokens sem novo login.
 4. **Verificação de e-mail** — transição `PENDING` → `ACTIVE`.
 5. **Observabilidade** — logs estruturados, métricas e tracing distribuído.
-6. **Modularização futura** — extrair bounded contexts (auth, dashboard, content) se a carga ou o time crescer.
+6. **Modularização futura** — extrair bounded contexts (auth, user, gamer, content) para microserviços se a carga ou o time crescer.
 
 ---
 
