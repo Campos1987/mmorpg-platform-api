@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grankain.platformapi.auth.dto.request.LoginRequest;
-import com.grankain.platformapi.auth.dto.request.RegisterRequest;
-import com.grankain.platformapi.auth.dto.response.LoginResponse;
-import com.grankain.platformapi.auth.dto.response.RegisterResponse;
+import com.grankain.platformapi.user.dto.request.RegisterRequest;
+import com.grankain.platformapi.user.dto.response.LoginResponse;
+import com.grankain.platformapi.user.dto.response.RegisterResponse;
 import com.grankain.platformapi.auth.service.LoginService;
 import com.grankain.platformapi.auth.service.RegisterService;
 import com.grankain.platformapi.infra.util.IpUtil;

@@ -7,28 +7,39 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-import com.grankain.platformapi.auth.domain.Account;
-import com.grankain.platformapi.auth.domain.AccountStatus;
-import com.grankain.platformapi.auth.repository.AccountRepository;
+import com.grankain.platformapi.user.domain.AccountStatus;
+import com.grankain.platformapi.user.domain.PlatformUser;
+import com.grankain.platformapi.user.repository.PlatformUserRepository;
 
+/**
+ * Componente transversal de segurança para validação do estado de contas de usuário.
+ * <p>
+ * Centraliza a verificação de existência e status da conta, evitando duplicação
+ * nos serviços de domínio.
+ *
+ * @deprecated Prefira usar o método {@code resolveActiveUser} diretamente em
+ *             {@link com.grankain.platformapi.user.service.PlatformUserService},
+ *             que já encapsula esta lógica. Este componente será removido na Etapa 3.
+ */
 @Component
 public class UserSecurity {
-    private final AccountRepository accountRepository;
 
-    public UserSecurity(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
+    private final PlatformUserRepository platformUserRepository;
+
+    public UserSecurity(PlatformUserRepository platformUserRepository) {
+        this.platformUserRepository = platformUserRepository;
     }
 
-    public Account checkUserStatus(UUID accontId) {
-        Objects.requireNonNull(accontId, "Account ID cannot be null");
-        
-        Account account = accountRepository.findById(accontId)
+    public PlatformUser checkUserStatus(UUID accountId) {
+        Objects.requireNonNull(accountId, "Account ID cannot be null");
+
+        PlatformUser user = platformUserRepository.findById(accountId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        
-        if (account.getStatus() != AccountStatus.ACTIVE) {
+
+        if (user.getStatus() != AccountStatus.ACTIVE) {
             throw new BadCredentialsException("Account is not activated");
         }
 
-        return account;
+        return user;
     }
 }

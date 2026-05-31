@@ -1,8 +1,8 @@
 package com.grankain.platformapi.auth.domain.login;
 
-import com.grankain.platformapi.auth.domain.Account;
-import com.grankain.platformapi.auth.domain.AccountStatus;
-import com.grankain.platformapi.auth.repository.AccountRepository;
+import com.grankain.platformapi.user.domain.AccountStatus;
+import com.grankain.platformapi.user.domain.PlatformUser;
+import com.grankain.platformapi.user.repository.PlatformUserRepository;
 import com.grankain.platformapi.auth.repository.BlockIpUserRepository;
 import com.grankain.platformapi.auth.service.LoginAttemptService;
 import org.springframework.stereotype.Component;
@@ -20,14 +20,14 @@ public class AccessCounterFailure {
     private static final int BLOCK_ACC_DURATION_MINUTES = 5;
 
 
-    private final AccountRepository accountRepository;
+    private final PlatformUserRepository platformUserRepository;
     private final BlockIpUserRepository blockIpUserRepository;
     private final LoginAttemptService loginAttemptService;
 
-    public AccessCounterFailure(AccountRepository accountRepository, BlockIpUserRepository blockIpUserRepository,
+    public AccessCounterFailure(PlatformUserRepository platformUserRepository, BlockIpUserRepository blockIpUserRepository,
         LoginAttemptService loginAttemptService
     ) {
-        this.accountRepository = accountRepository;
+        this.platformUserRepository = platformUserRepository;
         this.blockIpUserRepository = blockIpUserRepository;
         this.loginAttemptService = loginAttemptService;
     }
@@ -60,7 +60,7 @@ public class AccessCounterFailure {
      * Verifica se a conta está suspensa e trata a reativação automática após o término do tempo de bloqueio.
      */
     @Transactional
-    public boolean checkAndRestoreAccountSuspension(Account user) {
+    public boolean checkAndRestoreAccountSuspension(PlatformUser user) {
         if (user.getStatus() != AccountStatus.SUSPENDED) {
             return false;
         }
@@ -76,7 +76,7 @@ public class AccessCounterFailure {
             user.setStatus(AccountStatus.ACTIVE);
             user.setFailedAt(Instant.EPOCH);
             user.setFailedAccessCounter(0);
-            accountRepository.save(user);
+            platformUserRepository.save(user);
             return false;
         }
 
@@ -94,7 +94,7 @@ public class AccessCounterFailure {
             throw new IllegalArgumentException("The account ID cannot be null.");
         }
 
-        Account user = accountRepository.findById(accountId)
+        PlatformUser user = platformUserRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found: " + accountId));
 
         if (user.getFailedAccessCounter() < 5) {
@@ -106,7 +106,7 @@ public class AccessCounterFailure {
         }
 
         user.setFailedAt(Instant.now());
-        accountRepository.saveAndFlush(user);
+        platformUserRepository.saveAndFlush(user);
 
         loginAttemptService.registerIpFailedAttempt(ipUser);
     }

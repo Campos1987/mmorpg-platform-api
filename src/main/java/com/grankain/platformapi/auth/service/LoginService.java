@@ -7,14 +7,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.grankain.platformapi.auth.domain.Account;
-import com.grankain.platformapi.auth.domain.AccountStatus;
+import com.grankain.platformapi.user.domain.AccountStatus;
+import com.grankain.platformapi.user.domain.PlatformUser;
+import com.grankain.platformapi.user.domain.vo.Email;
+import com.grankain.platformapi.user.domain.vo.Username;
+import com.grankain.platformapi.user.dto.response.LoginResponse;
+import com.grankain.platformapi.user.repository.PlatformUserRepository;
 import com.grankain.platformapi.auth.domain.login.AccessCounterFailure;
-import com.grankain.platformapi.auth.domain.vo.Email;
-import com.grankain.platformapi.auth.domain.vo.Username;
 import com.grankain.platformapi.auth.dto.request.LoginRequest;
-import com.grankain.platformapi.auth.dto.response.LoginResponse;
-import com.grankain.platformapi.auth.repository.AccountRepository;
 import com.grankain.platformapi.infra.security.TokenGenerator;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LoginService {
 
-    private final AccountRepository repository;
+    private final PlatformUserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final AccessCounterFailure accessCounterFailure;
     private final TokenGenerator tokenGenerator;
     private final LoginAttemptService loginAttemptService;
 
-    public LoginService(AccountRepository repository, PasswordEncoder passwordEncoder,
+    public LoginService(PlatformUserRepository repository, PasswordEncoder passwordEncoder,
             AccessCounterFailure accessCounterFailure, TokenGenerator tokenGenerator,
             LoginAttemptService loginAttemptService) {
         this.repository = repository;
@@ -46,21 +46,21 @@ public class LoginService {
             throw new BadCredentialsException("IP address temporarily blocked due to excessive failures.");
         }
 
-        // Busca a conta do usuário
-        Optional<Account> optionalAccount;
+        // Busca a conta do usuário por e-mail ou username
+        Optional<PlatformUser> optionalUser;
         if (login.user().contains("@")) {
-            optionalAccount = repository.findByEmail(new Email(login.user()));
+            optionalUser = repository.findByEmail(new Email(login.user()));
         } else {
-            optionalAccount = repository.findByUser(new Username(login.user()));
+            optionalUser = repository.findByUser(new Username(login.user()));
         }
 
-        // Se a conta não existe, registramos a falha do IP para evitar
-        if (optionalAccount.isEmpty()) {
+        // Se a conta não existe, registra a falha do IP
+        if (optionalUser.isEmpty()) {
             loginAttemptService.registerIpFailedAttempt(ipUser);
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        Account user = optionalAccount.get();
+        PlatformUser user = optionalUser.get();
 
         // Verifica se a conta está suspensa
         if (accessCounterFailure.checkAndRestoreAccountSuspension(user)) {
@@ -77,8 +77,8 @@ public class LoginService {
         }
 
         String userToken = null;
-        if(user.getStatus() == AccountStatus.ACTIVE) {
-            //Sucesso no login: zera os contadores e atualiza IP e data
+        if (user.getStatus() == AccountStatus.ACTIVE) {
+            // Sucesso no login: zera os contadores e atualiza IP e data
             accessCounterFailure.resetIpCounter(ipUser);
             user.setFailedAccessCounter(0);
             user.setFailedAt(null);
@@ -87,8 +87,8 @@ public class LoginService {
 
             userToken = tokenGenerator.generate(user);
 
-            log.info(userToken);
-        }else{
+            log.info("Login successful for user={}", user.getUser().value());
+        } else {
             throw new BadCredentialsException(user.getStatus().name());
         }
 

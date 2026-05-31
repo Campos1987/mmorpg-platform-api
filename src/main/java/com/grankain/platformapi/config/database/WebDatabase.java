@@ -23,7 +23,7 @@ import jakarta.persistence.EntityManagerFactory;
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.grankain.platformapi.auth.repository", entityManagerFactoryRef = "webEntityManagerFactory", transactionManagerRef = "webTransactionManager")
+@EnableJpaRepositories(basePackages = "com.grankain.platformapi.user.repository", entityManagerFactoryRef = "webEntityManagerFactory", transactionManagerRef = "webTransactionManager")
 public class WebDatabase {
 
     /**
@@ -56,7 +56,7 @@ public class WebDatabase {
         return builder
                 .dataSource(dataSource)
                 // Pacotes escaneados pelo Hibernate em busca de classes anotadas com @Entity.
-                .packages("com.grankain.platformapi.auth.domain")
+                .packages("com.grankain.platformapi.user.domain")
                 .persistenceUnit("WebPU")
                 .build();
     }

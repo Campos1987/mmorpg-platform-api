@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Component;
 
-import com.grankain.platformapi.auth.domain.Account;
+import com.grankain.platformapi.user.domain.PlatformUser;
 
 @Component
 public class TokenGenerator {
@@ -20,7 +20,7 @@ public class TokenGenerator {
         this.jwtEncoder = jwtEncoder;
     }
 
-    public String generate(Account user) {
+    public String generate(PlatformUser user) {
         long expiry = 3600L; // 1 hora de expiração
         final Instant now = Instant.now();
 
