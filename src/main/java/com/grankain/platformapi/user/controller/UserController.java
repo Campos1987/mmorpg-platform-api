@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grankain.platformapi.user.dto.request.BirthdayRequest;
+import com.grankain.platformapi.user.dto.request.ChangePasswordRequest;
 import com.grankain.platformapi.user.dto.response.UserProfileResponse;
 import com.grankain.platformapi.user.service.PlatformUserService;
 
@@ -63,7 +64,16 @@ public class UserController {
             @Valid @RequestBody BirthdayRequest birthdayRequest) {
         UUID userId = UUID.fromString(jwt.getSubject());
 
-        log.info("Setting birthday for userId={}", userId);
         return ResponseEntity.ok(platformUserService.updateBirthday(userId, birthdayRequest.birthday()));
     }
+
+    @PostMapping("/changePassword")
+    public ResponseEntity<Boolean> changePassword(
+            @NonNull @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        return ResponseEntity.ok(platformUserService.changePassword(userId, changePasswordRequest));
+    }
+
 }

@@ -25,7 +25,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Entidade JPA que representa uma conta de usuário na plataforma web (banco gk_web_user).
+ * Entidade JPA que representa uma conta de usuário na plataforma web (banco
+ * gk_web_user).
  * <p>
  * Segue o padrão de Modelo Rico (Rich Domain Model), onde a entidade possui
  * comportamento e lógica de domínio embutidos, evitando o Anemic Domain Model.
@@ -45,8 +46,10 @@ public class PlatformUser {
     private String fullName;
 
     /**
-     * @Embedded: O Spring Data JPA irá "achatá-lo" e incluir seus campos na tabela 'accounts'.
-     * @AttributeOverride: Permite customizar o nome da coluna do Value Object nesta tabela.
+     * @Embedded: O Spring Data JPA irá "achatá-lo" e incluir seus campos na tabela
+     *            'accounts'.
+     * @AttributeOverride: Permite customizar o nome da coluna do Value Object nesta
+     *                     tabela.
      */
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false, unique = true))
@@ -64,6 +67,7 @@ public class PlatformUser {
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
 
+    @Setter
     @Column(name = "password", nullable = false)
     private String hashPassword;
 
@@ -123,7 +127,8 @@ public class PlatformUser {
     }
 
     /**
-     * Formata o nome completo para garantir que cada palavra comece com letra maiúscula.
+     * Formata o nome completo para garantir que cada palavra comece com letra
+     * maiúscula.
      * Exemplo: "joão silva" -> "João Silva"
      */
     public static String capitalizeFullName(String fullName) {

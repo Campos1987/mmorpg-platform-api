@@ -42,3 +42,5 @@ dockerfile
 ajustar-em-prod.txt
 # Ignorar chaves sensiveis
 *.pem
+
+.AGENT.md

@@ -5,11 +5,13 @@ import java.util.UUID;
 
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.grankain.platformapi.user.domain.AccountStatus;
 import com.grankain.platformapi.user.domain.PlatformUser;
+import com.grankain.platformapi.user.dto.request.ChangePasswordRequest;
 import com.grankain.platformapi.user.dto.response.UserProfileResponse;
 import com.grankain.platformapi.user.repository.PlatformUserRepository;
 
@@ -18,9 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Objects;
 
 /**
- * Service responsável pelo gerenciamento dos dados do perfil do usuário autenticado.
+ * Service responsável pelo gerenciamento dos dados do perfil do usuário
+ * autenticado.
  * <p>
- * Orquestra os casos de uso relacionados à conta da plataforma web (banco gk_web_user),
+ * Orquestra os casos de uso relacionados à conta da plataforma web (banco
+ * gk_web_user),
  * incluindo consulta de perfil e atualização de dados pessoais.
  */
 @Slf4j
@@ -28,9 +32,11 @@ import java.util.Objects;
 public class PlatformUserService {
 
     private final PlatformUserRepository platformUserRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public PlatformUserService(PlatformUserRepository platformUserRepository) {
+    public PlatformUserService(PlatformUserRepository platformUserRepository, PasswordEncoder passwordEncoder) {
         this.platformUserRepository = platformUserRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -73,6 +79,30 @@ public class PlatformUserService {
         platformUserRepository.save(user);
 
         log.info("Birthday updated for accountId={}", accountId);
+        return true;
+    }
+
+    @Transactional
+    public boolean changePassword(UUID accountId, ChangePasswordRequest request) {
+        Objects.requireNonNull(request, "New password cannot be null.");
+
+        PlatformUser user = resolveActiveUser(accountId);
+        if(request.oldPassword().equals(request.newPassword())) {
+            throw new BadCredentialsException("New password cannot be same as old password.");
+        }
+
+        boolean isPasswordValid = passwordEncoder.matches(request.oldPassword(),
+                user.getHashPassword());
+
+        if (!isPasswordValid) {
+            throw new BadCredentialsException("Invalid old password.");
+        }
+
+        String newPasswordHash = passwordEncoder.encode(request.newPassword());
+        user.setHashPassword(newPasswordHash);
+        platformUserRepository.save(user);
+
+        log.info("Password changed for accountId={}", accountId);
         return true;
     }
 

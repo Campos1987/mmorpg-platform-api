@@ -18,10 +18,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.grankain.platformapi.user.domain.AccountStatus;
 import com.grankain.platformapi.user.domain.PlatformUser;
-import com.grankain.platformapi.user.domain.UserAccess;
 import com.grankain.platformapi.user.domain.vo.Email;
 import com.grankain.platformapi.user.domain.vo.Username;
 import com.grankain.platformapi.user.dto.response.UserProfileResponse;
+import com.grankain.platformapi.user.dto.request.ChangePasswordRequest;
+import java.util.Objects;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.grankain.platformapi.user.repository.PlatformUserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +31,9 @@ class PlatformUserServiceTest {
 
     @Mock
     private PlatformUserRepository platformUserRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private PlatformUserService platformUserService;
@@ -61,6 +66,7 @@ class PlatformUserServiceTest {
 
     @Test
     void findUserProfile_WithActiveUser_ShouldReturnProfile() {
+        Objects.requireNonNull(activeUserId);
         when(platformUserRepository.findById(activeUserId)).thenReturn(Optional.of(activeUser));
 
         UserProfileResponse response = platformUserService.findUserProfile(activeUserId);
@@ -97,5 +103,40 @@ class PlatformUserServiceTest {
         assertTrue(result);
         assertEquals(newBirthday, activeUser.getBirthday());
         verify(platformUserRepository).save(activeUser);
+    }
+
+    @Test
+    void changePassword_WithValidCredentials_ShouldUpdatePasswordAndSave() {
+        when(platformUserRepository.findById(activeUserId)).thenReturn(Optional.of(activeUser));
+        when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
+        when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
+
+        ChangePasswordRequest request = new ChangePasswordRequest("oldPassword", "newPassword");
+        boolean result = platformUserService.changePassword(activeUserId, request);
+
+        assertTrue(result);
+        assertEquals("newEncodedPassword", activeUser.getHashPassword());
+        verify(platformUserRepository).save(activeUser);
+    }
+
+    @Test
+    void changePassword_WithSameOldAndNewPassword_ShouldThrowBadCredentialsException() {
+        when(platformUserRepository.findById(activeUserId)).thenReturn(Optional.of(activeUser));
+
+        ChangePasswordRequest request = new ChangePasswordRequest("samePassword", "samePassword");
+
+        assertThrows(BadCredentialsException.class, () -> platformUserService.changePassword(activeUserId, request));
+        verify(platformUserRepository, never()).save(any());
+    }
+
+    @Test
+    void changePassword_WithIncorrectOldPassword_ShouldThrowBadCredentialsException() {
+        when(platformUserRepository.findById(activeUserId)).thenReturn(Optional.of(activeUser));
+        when(passwordEncoder.matches("wrongOldPassword", "encodedPassword")).thenReturn(false);
+
+        ChangePasswordRequest request = new ChangePasswordRequest("wrongOldPassword", "newPassword");
+
+        assertThrows(BadCredentialsException.class, () -> platformUserService.changePassword(activeUserId, request));
+        verify(platformUserRepository, never()).save(any());
     }
 }
