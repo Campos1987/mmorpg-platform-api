@@ -3,7 +3,7 @@
 > **Para:** Time de Frontend (Next.js / TypeScript)
 > **Módulo:** Autenticação e Gestão de Contas
 > **Versão da API:** `0.0.1-SNAPSHOT`
-> **Última atualização:** 2026-05-23
+> **Última atualização:** 2026-06-01
 
 ---
 
@@ -639,6 +639,146 @@ export async function loginAction(
 
 ---
 
+### 4.4 Alterar Senha do Usuário Autenticado
+
+#### Propósito
+
+Permite que o usuário autenticado altere sua própria senha. O endpoint exige a senha atual como confirmação de identidade antes de aplicar a nova senha.
+
+> **Regra de negócio:** A nova senha não pode ser idêntica à senha atual.
+
+#### Método e Endpoint
+
+```
+POST /user/changePassword
+```
+
+#### Headers
+
+```http
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <seu_jwt_token>
+```
+
+#### Corpo da Requisição (Payload)
+
+```json
+{
+  "oldPassword": "SenhaAntiga@1",
+  "newPassword": "NovaSenha@2"
+}
+```
+
+| Campo         | Tipo     | Obrigatório | Restrições                                                              |
+|---------------|----------|-------------|-------------------------------------------------------------------------|
+| `oldPassword` | `string` | Sim         | Senha atual do usuário. Validada via `@ValidPassword` (complexidade)    |
+| `newPassword` | `string` | Sim         | Nova senha. Validada via `@ValidPassword`. Não pode ser igual à antiga  |
+
+#### Respostas Esperadas
+
+**`200 OK` — Senha alterada com sucesso:**
+
+```json
+true
+```
+
+> Retorna o booleano `true` diretamente no corpo da resposta.
+
+---
+
+**`400 Bad Request` — Validação de campos falhou:**
+
+```json
+{
+  "timestamp": "2026-06-01T18:00:00Z",
+  "status": 400,
+  "error": "BAD_REQUEST",
+  "message": "oldPassword: ...",
+  "trace": null,
+  "path": "/user/changePassword"
+}
+```
+
+---
+
+**`401 Unauthorized` — Senha atual incorreta ou nova senha igual à antiga:**
+
+```json
+{
+  "timestamp": "2026-06-01T18:00:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "Invalid old password.",
+  "trace": [],
+  "path": "/user/changePassword"
+}
+```
+
+| Cenário                                       | `message` em DEV                                  |
+|-----------------------------------------------|---------------------------------------------------|
+| Senha atual (`oldPassword`) incorreta         | `"Invalid old password."`                         |
+| Nova senha idêntica à senha atual             | `"New password cannot be same as old password."` |
+| Conta inativa / suspensa                      | `"Account is not activated."`                     |
+
+> Em produção, `message` será sempre `null`. Mapeie o campo `error` e o HTTP status para exibir mensagens amigáveis ao usuário.
+
+---
+
+#### TypeScript — Interfaces para este Endpoint
+
+```typescript
+// types/user.ts
+
+/** Payload enviado no corpo da requisição de alteração de senha */
+export interface ChangePasswordRequest {
+    /** Senha atual do usuário (deve satisfazer @ValidPassword) */
+    oldPassword: string;
+    /** Nova senha desejada (deve satisfazer @ValidPassword e ser diferente da atual) */
+    newPassword: string;
+}
+```
+
+**Exemplo de uso em um Server Action (Next.js):**
+
+```typescript
+// actions/change-password.ts
+'use server';
+
+import { cookies } from 'next/headers';
+import type { ChangePasswordRequest } from '@/types/user';
+import type { ApiError } from '@/types/api';
+
+export async function changePasswordAction(
+    payload: ChangePasswordRequest
+): Promise<{ success?: true; error?: ApiError }> {
+    const token = cookies().get('auth_token')?.value;
+
+    if (!token) {
+        return { error: { error: 'UNAUTHORIZED', timestamp: null, status: null, message: null, trace: null, path: null } };
+    }
+
+    const res = await fetch('http://localhost:4000/user/changePassword', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+        const json = await res.json();
+        return { error: json as ApiError };
+    }
+
+    return { success: true };
+}
+```
+
+---
+
 ## 5. Interface Global de Erro (TypeScript)
 
 Copie este arquivo para seu projeto e use em todos os tratamentos de erro da API.
@@ -687,15 +827,16 @@ export function isApiError(value: unknown): value is ApiError {
 
 ---
 
-## 6. Referência Rápida de Endpoints
+## 7. Referência Rápida de Endpoints
 
-| Método   | Endpoint           | Autenticação               | Descrição                            |
-|----------|--------------------|----------------------------|--------------------------------------|
-| `POST`   | `/auth/register`   | Pública                    | Registra uma nova conta de jogador   |
-| `POST`   | `/auth/login`      | Pública                    | Autentica e retorna JWT              |
-| `GET`    | `/actuator/health` | Pública                    | Health check do servidor             |
-| `GET`    | `/posts/**`        | Pública                    | Leitura de posts, eventos e notícias |
-| `POST`   | `/user/me`         | `Bearer token` obrigatório | Retorna os dados do perfil logado    |
-| `POST`   | `/user/setBirthday`| `Bearer token` obrigatório | Salva a data de nascimento do logado |
-| `GET`    | `/gamer/account`   | `Bearer token` obrigatório | Retorna a conta de jogo vinculada    |
-| Qualquer | Demais rotas       | `Bearer token` obrigatório | Rotas protegidas exigem JWT válido   |
+| Método   | Endpoint                  | Autenticação               | Descrição                                     |
+|----------|---------------------------|----------------------------|-----------------------------------------------|
+| `POST`   | `/auth/register`          | Pública                    | Registra uma nova conta de jogador            |
+| `POST`   | `/auth/login`             | Pública                    | Autentica e retorna JWT                       |
+| `GET`    | `/actuator/health`        | Pública                    | Health check do servidor                      |
+| `GET`    | `/posts/**`               | Pública                    | Leitura de posts, eventos e notícias          |
+| `POST`   | `/user/me`                | `Bearer token` obrigatório | Retorna os dados do perfil logado             |
+| `POST`   | `/user/setBirthday`       | `Bearer token` obrigatório | Salva a data de nascimento do usuário logado  |
+| `POST`   | `/user/changePassword`    | `Bearer token` obrigatório | Altera a senha do usuário autenticado         |
+| `GET`    | `/gamer/account`          | `Bearer token` obrigatório | Retorna a conta de jogo vinculada             |
+| Qualquer | Demais rotas              | `Bearer token` obrigatório | Rotas protegidas exigem JWT válido            |

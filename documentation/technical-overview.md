@@ -2,7 +2,7 @@
 
 > **Projeto:** Grankain Platform API  
 > **Versão documentada:** `0.0.1-SNAPSHOT`  
-> **Última atualização:** 2026-05-23  
+> **Última atualização:** 2026-06-01  
 > **Porta padrão:** `4000`
 
 ---
@@ -26,6 +26,7 @@ O serviço gerencia o ciclo de vida completo de uma conta de jogador: desde o re
 | Tratamento centralizado e padronizado de erros (RFC-style) | ✅ Implementado |
 | Segurança de transporte e headers HTTP defensivos | ✅ Implementado |
 | Containerização com Docker multi-stage | ✅ Implementado |
+| Alteração de senha autenticada (`POST /user/changePassword`) | ✅ Implementado |
 
 ---
 
@@ -85,7 +86,14 @@ com.grankain.platformapi
 ├── user/                          ← Domínio da conta na plataforma web
 │   ├── controller/
 │   │   └── UserController.java
-│   ├── domain/                    ← PlatformUser
+│   ├── domain/                    ← PlatformUser (Rich Domain Model)
+│   │   └── PlatformUser.java      ← Entidade JPA com @Setter em hashPassword
+│   ├── dto/
+│   │   ├── request/
+│   │   │   ├── BirthdayRequest.java
+│   │   │   └── ChangePasswordRequest.java  ← Record com @ValidPassword
+│   │   └── response/
+│   │       └── UserProfileResponse.java
 │   ├── repository/
 │   │   └── PlatformUserRepository.java
 │   └── service/
@@ -306,6 +314,75 @@ Estes endpoints são liberados pela `SecurityFilterChain` sem necessidade de tok
 
 ---
 
+### 4.4 Endpoints Protegidos — Domínio `user`
+
+Os endpoints abaixo exigem `Authorization: Bearer <jwt_token>` em todas as requisições.
+
+---
+
+#### `POST /user/me` — Retorna o perfil do usuário autenticado
+
+**Response — HTTP 200 OK:**
+
+```json
+{
+  "login": "GankMaster",
+  "fullName": "João Silva",
+  "email": "joao.silva@email.com",
+  "birthday": "1990-07-15",
+  "createdAt": "2026-01-10T12:00:00Z",
+  "accessedAt": "2026-06-01T15:00:00Z",
+  "status": "ACTIVE"
+}
+```
+
+---
+
+#### `POST /user/setBirthday` — Registra a data de nascimento
+
+> **Regra de negócio:** Só pode ser definida uma vez. Tentativas subsequentes retornam erro.
+
+**Request Body:**
+
+```json
+{ "birthday": "1990-07-15" }
+```
+
+**Response — HTTP 200 OK:** `true`
+
+---
+
+#### `POST /user/changePassword` — Altera a senha do usuário autenticado
+
+> **Regra de negócio:** A nova senha não pode ser idêntica à senha atual. A senha atual é verificada com `PasswordEncoder.matches()` (Argon2id) antes de qualquer alteração.
+
+**Request Body:**
+
+```json
+{
+  "oldPassword": "SenhaAntiga@1",
+  "newPassword": "NovaSenha@2"
+}
+```
+
+| Campo         | Tipo     | Validações                                                 |
+|---------------|----------|------------------------------------------------------------|
+| `oldPassword` | `String` | `@ValidPassword` (complexidade); verificado contra o hash  |
+| `newPassword` | `String` | `@ValidPassword`; deve diferir de `oldPassword`            |
+
+**Response — HTTP 200 OK:** `true`
+
+**Cenários de erro:**
+
+| Cenário | HTTP Status | `error` |
+|---|---|---|
+| Campos inválidos (`@ValidPassword` falhou) | `400` | `BAD_REQUEST` |
+| Nova senha igual à atual | `401` | `UNAUTHORIZED` |
+| Senha atual (`oldPassword`) incorreta | `401` | `UNAUTHORIZED` |
+| Conta inativa ou suspensa | `401` | `UNAUTHORIZED` |
+
+---
+
 ### 4.3 Padrão de Resposta de Erro
 
 Todas as exceções são capturadas pelo `GlobalExceptionHandler` e retornam o seguinte contrato JSON.
@@ -345,12 +422,15 @@ Todas as exceções são capturadas pelo `GlobalExceptionHandler` e retornam o s
 
 > Em produção, apenas o campo `error` é exposto para evitar **Information Exposure** (CWE-200). Nenhum detalhe técnico, caminho de arquivo ou stack trace é revelado ao cliente.
 
-**Mapeamento de exceções para status HTTP:**
+
+---
+
+### 4.5 Mapeamento de Exceções para Status HTTP
 
 | Exceção | HTTP Status | Cenário |
 |---|---|---|
 | `AccountAlreadyExistsException` | `404 Not Found` | E-mail/username já cadastrados ou Conta do Jogo Inexistente |
-| `BadCredentialsException` | `401 Unauthorized` | Senha incorreta, conta suspensa/banida, IP bloqueado |
+| `BadCredentialsException` | `401 Unauthorized` | Senha incorreta, conta suspensa/banida, IP bloqueado, nova senha igual à atual, `oldPassword` inválida |
 | `MethodArgumentNotValidException` | `400 Bad Request` | Falha nas validações Jakarta Bean Validation (`@Valid`) |
 | `DateTimeParseException` | `400 Bad Request` | Data de nascimento em formato inválido |
 | `DataIntegrityViolationException` | `409 Conflict` | Violação de constraint no banco (fallback de duplicidade) |
