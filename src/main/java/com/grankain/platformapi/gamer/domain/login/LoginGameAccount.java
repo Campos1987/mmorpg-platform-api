@@ -1,4 +1,4 @@
-package com.grankain.platformapi.gamer.domain;
+package com.grankain.platformapi.gamer.domain.login;
 
 import java.util.UUID;
 
@@ -21,7 +21,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "accounts")
 @Getter
-public class GameAccount {
+public class LoginGameAccount {
 
     /**
      * Login do jogador no jogo — é a chave primária desta tabela.

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.grankain.platformapi.gamer.domain.Character;
+import com.grankain.platformapi.gamer.domain.game.Character;
 
 public interface CharacterRepository extends JpaRepository<Character, String> {
 

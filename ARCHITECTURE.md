@@ -77,7 +77,8 @@ flowchart TB
 
     subgraph Domínio
         PU[PlatformUser]
-        GA[GameAccount]
+        LGA[LoginGameAccount]
+        CH[Character]
         ACF[AccessCounterFailure]
         VO[Value Objects]
     end
@@ -130,10 +131,15 @@ com.grankain.platformapi
 │
 ├── gamer/                         # Bounded context: contas do jogo L2
 │   ├── controller/                # GamerAccountController
-│   ├── domain/                    # GameAccount
-│   ├── exceptions/                # Exceções de jogo (GameAccountNotFound, etc)
-│   ├── repository/                # GameAccountRepository
-│   └── service/                   # GamerAccountService
+│   ├── domain/                    # Entidades do domínio
+│   │   ├── game/                  # Entidade Character (db-game)
+│   │   └── login/                 # Entidade LoginGameAccount (db-login)
+│   ├── dto/                       # Contratos request/response da API (CreateAccountRequest, CharacterStatus, etc.)
+│   ├── exceptions/                # Exceções de jogo (GameAccountNotFoundException, etc)
+│   ├── repository/                # Repositórios JPA
+│   │   ├── game/                  # CharacterRepository
+│   │   └── login/                 # LoginAccountRepository
+│   └── service/                   # Serviços (GamerAccountService, CharacterService)
 │
 ├── config/
 │   ├── database/                  # WebDatabase, LoginDatabase e GameDatabase Configs
@@ -186,15 +192,31 @@ com.grankain.platformapi
 | `last_ip` | `String` | Último IP de acesso bem-sucedido |
 | `access` | `UserAccess` | `USER`, `ADM`, `MODERATOR` |
 
-#### `accounts` (`GameAccount`) — Entidade de Contas do Jogo (Game Database)
+#### `accounts` (`LoginGameAccount`) — Entidade de Contas do Jogo (Login Database — `db-login`)
 
 | Campo | Tipo | Observação |
 |---|---|---|
-| `login` | `String` | PK (`Id`), sincronizado com account principal |
-| `account_id` | `UUID` | Vínculo com a tabela `accounts` de auth |
-| `password` | `String` | Hash do jogo |
-| `created_time` | `String` | Data de criação local do jogo |
-| `lastactive` | `String` | Última atividade in-game |
+| `login` | `String` | PK (`Id`), login do jogador no jogo |
+| `account_id` | `UUID` | Vínculo lógico com a conta da plataforma (PlatformUser.id) |
+| `password` | `String` | Senha hash do emulador L2 |
+| `created_time` | `String` | Data e hora de criação no banco do L2 |
+| `lastactive` | `String` | Timestamp da última atividade/conexão in-game |
+
+#### `characters` (`Character`) — Entidade de Personagem (Game Database — `db-game`)
+
+| Campo | Tipo | Observação |
+|---|---|---|
+| `char_name` | `String` | PK (`Id`), nome do personagem |
+| `account_name` | `String` | Nome da conta de jogo associada |
+| `level` | `int` | Nível atual do personagem |
+| `maxhp` | `float` | Pontos máximos de HP |
+| `maxmp` | `float` | Pontos máximos de MP |
+| `maxcp` | `float` | Pontos máximos de CP |
+| `race` | `int` | ID da raça do personagem |
+| `base_classid`| `int` | ID da classe base |
+| `classid` | `int` | ID da classe atual |
+| `exp` | `long` | Experiência total acumulada |
+| `karma` | `int` | Pontos de karma do personagem |
 
 #### `block_ip_user` — Controle de brute-force por IP
 

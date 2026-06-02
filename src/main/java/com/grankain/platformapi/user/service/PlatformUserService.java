@@ -78,7 +78,6 @@ public class PlatformUserService {
         user.updateBirthday(birthday);
         platformUserRepository.save(user);
 
-        log.info("Birthday updated for accountId={}", accountId);
         return true;
     }
 
@@ -102,7 +101,6 @@ public class PlatformUserService {
         user.setHashPassword(newPasswordHash);
         platformUserRepository.save(user);
 
-        log.info("Password changed for accountId={}", accountId);
         return true;
     }
 

@@ -5,15 +5,15 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.grankain.platformapi.gamer.domain.GameAccount;
+import com.grankain.platformapi.gamer.domain.login.LoginGameAccount;
 
 /**
- * Repositório para a entidade {@link GameAccount}.
+ * Repositório para a entidade {@link LoginGameAccount}.
  * <p>
  * Gerenciado pelo {@code LoginDatabase} e seu {@code loginEntityManagerFactory},
  * operando exclusivamente no banco de dados do emulador Lineage 2 ({@code db-login}).
  */
-public interface LoginAccountRepository extends JpaRepository<GameAccount, String> {
+public interface LoginAccountRepository extends JpaRepository<LoginGameAccount, String> {
 
     /**
      * Busca todas as contas de jogo vinculadas a um usuário da plataforma pelo seu UUID.
@@ -22,5 +22,7 @@ public interface LoginAccountRepository extends JpaRepository<GameAccount, Strin
      * @param accountId UUID do usuário da plataforma (PlatformUser.id).
      * @return Lista de contas de jogo vinculadas ao usuário.
      */
-    List<GameAccount> findByAccountId(UUID accountId);
+    List<LoginGameAccount> findByAccountId(UUID accountId);
+
+    boolean existsByLogin(String login);
 }

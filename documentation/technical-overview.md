@@ -102,10 +102,15 @@ com.grankain.platformapi
 ├── gamer/                         ← Domínio das contas in-game do L2
 │   ├── controller/
 │   │   └── GamerAccountController.java
-│   ├── domain/                    ← GameAccount
-│   ├── repository/
-│   │   └── GameAccountRepository.java
-│   └── service/
+│   ├── domain/                    ← Entidades do domínio
+│   │   ├── game/                  ← Character.java (db-game)
+│   │   └── login/                 ← LoginGameAccount.java (db-login)
+│   ├── dto/                       ← Contratos request/response (CreateAccountRequest, CharacterStatus, etc.)
+│   ├── repository/                ← Repositórios JPA
+│   │   ├── game/                  ← CharacterRepository.java
+│   │   └── login/                 ← LoginAccountRepository.java
+│   └── service/                   ← Serviços de aplicação
+│       ├── CharacterService.java
 │       └── GamerAccountService.java
 │
 ├── config/
@@ -314,7 +319,7 @@ Estes endpoints são liberados pela `SecurityFilterChain` sem necessidade de tok
 
 ---
 
-### 4.4 Endpoints Protegidos — Domínio `user`
+### 4.3 Endpoints Protegidos — Domínio user
 
 Os endpoints abaixo exigem `Authorization: Bearer <jwt_token>` em todas as requisições.
 
@@ -383,7 +388,60 @@ Os endpoints abaixo exigem `Authorization: Bearer <jwt_token>` em todas as requi
 
 ---
 
-### 4.3 Padrão de Resposta de Erro
+### 4.4 Endpoints Protegidos — Domínio gamer
+
+Os endpoints abaixo exigem `Authorization: Bearer <jwt_token>` em todas as requisições.
+
+---
+
+#### `POST /gamer/account` — Retorna as contas de jogo do usuário
+
+**Response — HTTP 200 OK:**
+
+Retorna um mapa onde as chaves são os logins das contas do jogo (ex: `GankMaster`), e os valores são as listas de personagens dessa conta.
+
+```json
+{
+  "GankMaster": [
+    {
+      "charName": "Hero",
+      "lvl": 80,
+      "maxHp": 3000,
+      "maxMp": 1000,
+      "maxCp": 500,
+      "race": 0,
+      "baseClassId": 1,
+      "classId": 2,
+      "exp": 1000000,
+      "karma": 0
+    }
+  ]
+}
+```
+
+---
+
+#### `POST /gamer/create` — Cria uma nova conta de jogo
+
+**Request Body:**
+
+```json
+{
+  "login": "mygameaccount",
+  "password": "mySecurePassword1"
+}
+```
+
+| Campo | Tipo | Validações |
+|---|---|---|
+| `login` | `String` | `@NotBlank`, `@ValidUser` (5–12 chars, alfanumérico) |
+| `password` | `String` | `@NotBlank`, `@ValidPassword` (complexidade) |
+
+**Response — HTTP 200 OK:** `true`
+
+---
+
+### 4.5 Padrão de Resposta de Erro
 
 Todas as exceções são capturadas pelo `GlobalExceptionHandler` e retornam o seguinte contrato JSON.
 
@@ -425,7 +483,7 @@ Todas as exceções são capturadas pelo `GlobalExceptionHandler` e retornam o s
 
 ---
 
-### 4.5 Mapeamento de Exceções para Status HTTP
+### 4.6 Mapeamento de Exceções para Status HTTP
 
 | Exceção | HTTP Status | Cenário |
 |---|---|---|

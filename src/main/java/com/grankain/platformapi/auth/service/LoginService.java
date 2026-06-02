@@ -87,7 +87,6 @@ public class LoginService {
 
             userToken = tokenGenerator.generate(user);
 
-            log.info("Login successful for user={}", user.getUser().value());
         } else {
             throw new BadCredentialsException(user.getStatus().name());
         }

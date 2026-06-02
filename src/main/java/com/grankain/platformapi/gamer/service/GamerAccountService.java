@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.grankain.platformapi.gamer.domain.GameAccount;
+import com.grankain.platformapi.gamer.domain.login.LoginGameAccount;
 import com.grankain.platformapi.gamer.dto.request.CreateAccountRequest;
+import com.grankain.platformapi.gamer.dto.response.CharacterStatus;
 import com.grankain.platformapi.gamer.exceptions.GameAccountNotFoundException;
 import com.grankain.platformapi.gamer.repository.login.LoginAccountRepository;
 import com.grankain.platformapi.infra.security.UserSecurity;
@@ -50,30 +50,25 @@ public class GamerAccountService {
      * @throws GameAccountNotFoundException se nenhuma conta de jogo for encontrada.
      */
     @Transactional(readOnly = true, transactionManager = "loginTransactionManager")
-    public Map<String, List<String>> findGameAccount(UUID accountId) {
+    public Map<String, List<CharacterStatus>> findGameAccount(UUID accountId) {
         Objects.requireNonNull(accountId, "Account ID is required.");
 
-        List<GameAccount> accounts = loginAccountRepository.findByAccountId(accountId);
+        List<LoginGameAccount> accounts = loginAccountRepository.findByAccountId(accountId);
 
         if (accounts.isEmpty()) {
             throw new GameAccountNotFoundException(
                     "No gamer accounts found");
         }
 
-        Map<String, List<String>> charactersByAccount = new HashMap<>();
+        Map<String, List<CharacterStatus>> charactersByAccount = new HashMap<>();
 
-        for (GameAccount account : accounts) {
+        for (LoginGameAccount account : accounts) {
             String login = account.getLogin();
 
-            List<String> characters = characterService.findAllCharacters(login)
-                .stream()
-                .map(c -> c.getCharName())
-                .collect(Collectors.toList());
+            List<CharacterStatus> characters = characterService.findAllCharacters(login);
 
             charactersByAccount.put(login, characters);
         }
-
-        log.info("Character by account: {}", charactersByAccount);
 
         return charactersByAccount;
     }
@@ -85,21 +80,26 @@ public class GamerAccountService {
         UUID userId = user.getId();
 
         
-        List<GameAccount> accounts = loginAccountRepository.findByAccountId(userId);
+        List<LoginGameAccount> accounts = loginAccountRepository.findByAccountId(userId);
 
         if (accounts.size() > 2) {
             throw new GameAccountNotFoundException(
                     "You can only have 3 gamer accounts");
         }
 
-        GameAccount gameAccount = new GameAccount();
+        boolean accountExists = loginAccountRepository.existsByLogin(request.login());
+
+        if(accountExists){
+            throw new GameAccountNotFoundException(
+                    "Account already exists");
+        }
+
+        LoginGameAccount gameAccount = new LoginGameAccount();
         gameAccount.setAccountId(userId);
         gameAccount.setLogin(request.login());
         gameAccount.setPassword(request.password());
 
         loginAccountRepository.save(gameAccount);
-
-        log.info("Game account created: login={}", gameAccount.getLogin());
 
         return true;
     }

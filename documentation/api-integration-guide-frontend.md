@@ -314,22 +314,18 @@ Accept: application/json
   "user": "GankMaster",
   "name": "João",
   "lastname": "Silva",
-  "birthday": "1990-07-15",
   "email": "joao.silva@email.com",
-  "password": "Senha@Segura1",
-  "recaptchaToken": "03AGdBq..."
+  "password": "Senha@Segura1"
 }
 ```
 
-| Campo            | Tipo     | Obrigatório | Restrições                                                                         |
-|------------------|----------|-------------|------------------------------------------------------------------------------------|
-| `user`           | `string` | Sim         | Mínimo 5, máximo 12 caracteres; apenas letras e números `[a-zA-Z0-9]`; sem espaços |
-| `name`           | `string` | Sim         | Entre 3 e 15 caracteres; apenas letras (incluindo acentuadas)                      |
-| `lastname`       | `string` | Sim         | Entre 3 e 15 caracteres; apenas letras (incluindo acentuadas)                      |
-| `birthday`       | `string` | Sim         | Formato ISO: `YYYY-MM-DD` (ex: `"1990-07-15"`)                                     |
-| `email`          | `string` | Sim         | E-mail válido; máximo 100 caracteres                                               |
-| `password`       | `string` | Sim         | Validação de complexidade via `@ValidPassword` (regras definidas no backend)       |
-| `recaptchaToken` | `string` | Sim         | Token obtido pelo provider de CAPTCHA                                              |
+| Campo      | Tipo     | Obrigatório | Restrições                                                                         |
+|------------|----------|-------------|------------------------------------------------------------------------------------|
+| `user`     | `string` | Sim         | Mínimo 5, máximo 12 caracteres; apenas letras e números `[a-zA-Z0-9]`; sem espaços |
+| `name`     | `string` | Sim         | Entre 1 e 15 caracteres; apenas letras (incluindo acentuadas)                      |
+| `lastname` | `string` | Sim         | Entre 1 e 15 caracteres; apenas letras (incluindo acentuadas)                      |
+| `email`    | `string` | Sim         | E-mail válido; máximo 100 caracteres                                               |
+| `password` | `string` | Sim         | Validação de complexidade via `@ValidPassword` (regras definidas no backend)       |
 
 #### Respostas Esperadas
 
@@ -348,10 +344,12 @@ Accept: application/json
 ---
 
 **`400 Bad Request` — Validação de campos falhou:**
-
+* Ocorre quando algum campo enviado não respeita as validações do DTO.
+* **Exceção no Backend:** Lança `MethodArgumentNotValidException`.
+* **Em DEV:**
 ```json
 {
-  "timestamp": "2026-05-23T03:05:00Z",
+  "timestamp": "2026-06-02T12:45:00Z",
   "status": 400,
   "error": "BAD_REQUEST",
   "message": "user: Username é obrigatório",
@@ -359,21 +357,43 @@ Accept: application/json
   "path": "/auth/register"
 }
 ```
-
-> Em `prod`, `message` será `null`. Use o campo `error` + HTTP status para exibir a mensagem correta ao usuário.
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "BAD_REQUEST",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
 
 ---
 
-**`404 Not Found` — E-mail ou username já cadastrado / Não encontrado:**
-
+**`409 Conflict` — Usuário ou e-mail já cadastrado:**
+* Ocorre quando o nome de usuário ou e-mail já existem no banco de dados.
+* **Exceção no Backend:** Lança `UserAlreadyExistsException` com a mensagem `"Usuário ou e-mail já em uso."` (`throw new UserAlreadyExistsException("Usuário ou e-mail já em uso.");`).
+* **Em DEV:**
 ```json
 {
-  "timestamp": "2026-05-23T03:05:10Z",
-  "status": 404,
-  "error": "NOT_FOUND",
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 409,
+  "error": "CONFLICT",
   "message": "Usuário ou e-mail já em uso.",
   "trace": [],
   "path": "/auth/register"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "CONFLICT",
+  "message": null,
+  "trace": null,
+  "path": null
 }
 ```
 
@@ -389,10 +409,8 @@ export interface RegisterRequest {
     user: string;
     name: string;
     lastname: string;
-    birthday: string; // formato: "YYYY-MM-DD"
     email: string;
     password: string;
-    recaptchaToken: string;
 }
 
 /** Resposta de sucesso do endpoint POST /auth/register */
@@ -438,7 +456,7 @@ export async function registerAction(
 #### Propósito
 
 Autentica um jogador existente com `username` **ou** `email` + `password`.
-Em caso de sucesso, retorna um JWT Bearer Token com validade de **1 hora**.
+Em caso de sucesso, retorna o JWT Bearer Token.
 
 > **Recurso importante:** O campo `user` aceita tanto o **username** quanto o **e-mail** do jogador.
 > O backend detecta automaticamente o tipo de input pela presença do caractere `@`.
@@ -489,20 +507,16 @@ Accept: application/json
 
 ```json
 {
-  "userName": "Joao Silva"
+  "token": "eyJ..."
 }
 ```
-
-| Campo      | Tipo                    | Descrição       |
-|------------|-------------------------|-----------------|
-| `userName` | `string` (ISO 8601 UTC) | Nome do Usuario |
 
 **Estrutura do JWT decodificado (payload):**
 
 ```json
 {
   "iss": "mmorpg-l2-api",
-  "sub": "GankMaster",
+  "sub": "4e73b22e-13c5-4309-8809-90604cfb2034",
   "scope": "ROLE_USER",
   "iat": 1748062600,
   "exp": 1748066200
@@ -512,7 +526,7 @@ Accept: application/json
 | Claim   | Descrição                                                          |
 |---------|--------------------------------------------------------------------|
 | `iss`   | Issuer (emissor): sempre `"mmorpg-l2-api"`                         |
-| `sub`   | Subject: username do jogador autenticado                           |
+| `sub`   | Subject: UUID do jogador autenticado                               |
 | `scope` | Role do usuário: `"ROLE_USER"`, `"ROLE_ADM"` ou `"ROLE_MODERATOR"` |
 | `iat`   | Issued At: timestamp de emissão (Unix)                             |
 | `exp`   | Expiration: `iat + 3600`. Token expira após **1 hora**             |
@@ -520,10 +534,12 @@ Accept: application/json
 ---
 
 **`400 Bad Request` — Campo ausente ou inválido:**
-
+* Ocorre se os campos não respeitarem o tamanho ou validações.
+* **Exceção no Backend:** Lança `MethodArgumentNotValidException`.
+* **Em DEV:**
 ```json
 {
-  "timestamp": "2026-05-23T03:11:00Z",
+  "timestamp": "2026-06-02T12:45:00Z",
   "status": 400,
   "error": "BAD_REQUEST",
   "message": "user: Username é obrigatório",
@@ -531,35 +547,129 @@ Accept: application/json
   "path": "/auth/login"
 }
 ```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "BAD_REQUEST",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
 
 ---
 
-**`401 Unauthorized` — Credenciais inválidas, conta suspensa ou IP bloqueado:**
-
+**`401 Unauthorized` — Credenciais inválidas (usuário incorreto ou senha incorreta):**
+* Ocorre quando o usuário não existe ou a senha está incorreta.
+* **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"Invalid username or password"` (`throw new BadCredentialsException("Invalid username or password");`).
+* **Em DEV:**
 ```json
 {
-  "timestamp": "2026-05-23T03:11:30Z",
+  "timestamp": "2026-06-02T12:45:00Z",
   "status": 401,
   "error": "UNAUTHORIZED",
-  "message": "Invalid User",
+  "message": "Invalid username or password",
   "trace": [],
   "path": "/auth/login"
 }
 ```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
 
-> **Atenção de UX:** Em produção, `message` será `null`.
-> O backend **intencionalmente não diferencia** "usuário não encontrado" de "senha incorreta"
-> para evitar enumeração de usuários (user enumeration attack).
-> O Frontend deve exibir uma mensagem genérica única, como: *"Usuário ou senha inválidos."*
+---
 
-**Cenários que retornam `401 Unauthorized`:**
+**`401 Unauthorized` — IP bloqueado temporariamente por força bruta:**
+* Ocorre após 7 ou mais tentativas falhas vindas do mesmo IP.
+* **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"IP address temporarily blocked due to excessive failures."` (`throw new BadCredentialsException("IP address temporarily blocked due to excessive failures.");`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "IP address temporarily blocked due to excessive failures.",
+  "trace": [],
+  "path": "/auth/login"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
 
-| Cenário                                    | `message` em DEV                      |
-|--------------------------------------------|---------------------------------------|
-| Usuário não existe no banco                | `"Invalid User"`                      |
-| Senha incorreta                            | `"Invalid User"`                      |
-| Conta com status `SUSPENDED` ou `BANNED`   | `"Account user suspended or blocked"` |
-| IP bloqueado (7 ou mais tentativas falhas) | `"Account user suspended or blocked"` |
+---
+
+**`401 Unauthorized` — Conta suspensa temporariamente:**
+* Ocorre após 5 ou mais tentativas de login falhas consecutivas nesta conta.
+* **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"Account is temporarily suspended."` (`throw new BadCredentialsException("Account is temporarily suspended.");`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "Account is temporarily suspended.",
+  "trace": [],
+  "path": "/auth/login"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+**`401 Unauthorized` — Status da conta inativo (ex: PENDING, BANNED):**
+* Ocorre quando a conta está cadastrada mas com status inativo.
+* **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem sendo o nome do status do usuário (ex: `throw new BadCredentialsException(user.getStatus().name());`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "PENDING",
+  "trace": [],
+  "path": "/auth/login"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
 
 ---
 
@@ -577,16 +687,14 @@ export interface LoginRequest {
 
 /** Resposta de sucesso do endpoint POST /auth/login */
 export interface LoginResponse {
-    /** Timestamp ISO 8601 do momento do login */
-    loginTime: string;
     /** JWT Bearer Token. Armazenar em cookie HttpOnly, nunca em localStorage */
-    claims: string;
+    token: string;
 }
 
 /** Payload decodificado do JWT */
 export interface JwtPayload {
     iss: string;      // "mmorpg-l2-api"
-    sub: string;      // username do jogador
+    sub: string;      // UUID do jogador
     scope: UserRole;  // role do usuário
     iat: number;      // Unix timestamp de emissão
     exp: number;      // Unix timestamp de expiração (iat + 3600)
@@ -607,7 +715,7 @@ import type {ApiError} from '@/types/api';
 
 export async function loginAction(
     payload: LoginRequest
-): Promise<{ data?: Pick<LoginResponse, 'loginTime'>; error?: ApiError }> {
+): Promise<{ success?: boolean; error?: ApiError }> {
     const res = await fetch('http://localhost:4000/auth/login', {
         method: 'POST',
         headers: {
@@ -621,10 +729,10 @@ export async function loginAction(
 
     if (!res.ok) return {error: json as ApiError};
 
-    const {claims, loginTime} = json as LoginResponse;
+    const {token} = json as LoginResponse;
 
     // Salva o JWT em cookie HttpOnly — inacessível ao JavaScript do browser
-    cookies().set('auth_token', claims, {
+    cookies().set('auth_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -632,14 +740,256 @@ export async function loginAction(
         path: '/',
     });
 
-    // Não retorna o token bruto para o client component
-    return {data: {loginTime}};
+    return {success: true};
 }
 ```
 
 ---
 
-### 4.4 Alterar Senha do Usuário Autenticado
+### 4.3 Obter Perfil do Usuário
+
+#### Propósito
+
+Retorna os dados detalhados do perfil do usuário autenticado na plataforma.
+
+#### Método e Endpoint
+
+```
+POST /user/me
+```
+
+#### Headers
+
+```http
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <seu_jwt_token>
+```
+
+#### Corpo da Requisição (Payload)
+
+*Não requer corpo na requisição. O usuário é identificado pelo JWT.*
+
+#### Respostas Esperadas
+
+**`200 OK` — Consulta realizada com sucesso:**
+
+```json
+{
+  "login": "GankMaster",
+  "fullName": "João Silva",
+  "email": "joao.silva@email.com",
+  "birthDate": "1990-07-15",
+  "createdTime": "2026-06-01T12:00:00Z",
+  "lastActive": "2026-06-02T12:45:00Z",
+  "status": "ACTIVE"
+}
+```
+
+---
+
+**`401 Unauthorized` — Token expirado, inválido ou ausente:**
+* Ocorre quando o header `Authorization` está ausente ou o JWT expirou.
+* **Exceção no Backend:** Lançado pelos filtros de segurança do Spring Security.
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+**`401 Unauthorized` — Conta de usuário inativa:**
+* Ocorre quando o usuário do JWT é válido, mas o status da conta no banco gk_web_user não é `ACTIVE`.
+* **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"Account is not activated."` (`throw new BadCredentialsException("Account is not activated.");`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "Account is not activated.",
+  "trace": [],
+  "path": "/user/me"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+#### TypeScript — Interfaces para este Endpoint
+
+```typescript
+// types/user.ts
+
+/** Resposta de sucesso do endpoint POST /user/me */
+export interface UserProfileResponse {
+    login: string;
+    fullName: string;
+    email: string;
+    birthDate: string | null;  // formato: "YYYY-MM-DD" ou null se não definido
+    createdTime: string;       // ISO 8601 UTC
+    lastActive: string;        // ISO 8601 UTC
+    status: string;            // Ex: "ACTIVE", "PENDING", "SUSPENDED", "BANNED"
+}
+```
+
+---
+
+### 4.4 Definir Data de Nascimento
+
+#### Propósito
+
+Define a data de nascimento do usuário autenticado. **Regra de Negócio:** Só pode ser preenchida uma única vez; modificações posteriores não são permitidas.
+
+#### Método e Endpoint
+
+```
+POST /user/setBirthday
+```
+
+#### Headers
+
+```http
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <seu_jwt_token>
+```
+
+#### Corpo da Requisição (Payload)
+
+```json
+{
+  "birthday": "1990-07-15"
+}
+```
+
+| Campo      | Tipo     | Obrigatório | Restrições                                                              |
+|------------|----------|-------------|-------------------------------------------------------------------------|
+| `birthday` | `string` | Sim         | Formato ISO `YYYY-MM-DD`. Deve ser uma data válida e no passado         |
+
+#### Respostas Esperadas
+
+**`200 OK` — Data gravada com sucesso:**
+
+```json
+true
+```
+
+---
+
+**`400 Bad Request` — Validação falhou ou formato de data inválido:**
+* Ocorre se a data for nula, no futuro, ou não obedecer ao padrão `YYYY-MM-DD`.
+* **Exceção no Backend:** Lança `MethodArgumentNotValidException` (para anotações do DTO) ou `DateTimeParseException` (formato inadequado).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 400,
+  "error": "BAD_REQUEST",
+  "message": "birthday: Birthday is required",
+  "trace": null,
+  "path": "/user/setBirthday"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "BAD_REQUEST",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+**`401 Unauthorized` — Token expirado ou Conta inativa:**
+* **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"Account is not activated."` (`throw new BadCredentialsException("Account is not activated.");`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "Account is not activated.",
+  "trace": [],
+  "path": "/user/setBirthday"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+**`500 Internal Server Error` — Data de nascimento já definida anteriormente:**
+* Ocorre se o usuário tentar preencher a data de nascimento após ela já ter sido registrada no banco.
+* **Exceção no Backend:** Lança `IllegalStateException` com a mensagem `"Birthday has already been set and cannot be changed."` (`throw new IllegalStateException("Birthday has already been set and cannot be changed.");`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 500,
+  "error": "INTERNAL_SERVER_ERROR",
+  "message": "Birthday has already been set and cannot be changed.",
+  "trace": [],
+  "path": "/user/setBirthday"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "INTERNAL_SERVER_ERROR",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+#### TypeScript — Interfaces para este Endpoint
+
+```typescript
+// types/user.ts
+
+/** Payload enviado no corpo da requisição de setBirthday */
+export interface BirthdayRequest {
+    birthday: string; // formato: "YYYY-MM-DD"
+}
+```
+
+---
+
+### 4.5 Alterar Senha do Usuário Autenticado
 
 #### Propósito
 
@@ -688,25 +1038,39 @@ true
 ---
 
 **`400 Bad Request` — Validação de campos falhou:**
-
+* Ocorre se os novos campos não atenderem à complexidade exigida por `@ValidPassword`.
+* **Exceção no Backend:** Lança `MethodArgumentNotValidException`.
+* **Em DEV:**
 ```json
 {
-  "timestamp": "2026-06-01T18:00:00Z",
+  "timestamp": "2026-06-02T12:45:00Z",
   "status": 400,
   "error": "BAD_REQUEST",
-  "message": "oldPassword: ...",
+  "message": "newPassword: Password must contain at least...",
   "trace": null,
   "path": "/user/changePassword"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "BAD_REQUEST",
+  "message": null,
+  "trace": null,
+  "path": null
 }
 ```
 
 ---
 
-**`401 Unauthorized` — Senha atual incorreta ou nova senha igual à antiga:**
-
+**`401 Unauthorized` — Senha atual incorreta, nova senha igual à antiga ou conta inativa:**
+* **Em DEV (Senha atual incorreta):**
+  * **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"Invalid old password."` (`throw new BadCredentialsException("Invalid old password.");`).
 ```json
 {
-  "timestamp": "2026-06-01T18:00:00Z",
+  "timestamp": "2026-06-02T12:45:00Z",
   "status": 401,
   "error": "UNAUTHORIZED",
   "message": "Invalid old password.",
@@ -714,14 +1078,41 @@ true
   "path": "/user/changePassword"
 }
 ```
-
-| Cenário                                       | `message` em DEV                                  |
-|-----------------------------------------------|---------------------------------------------------|
-| Senha atual (`oldPassword`) incorreta         | `"Invalid old password."`                         |
-| Nova senha idêntica à senha atual             | `"New password cannot be same as old password."` |
-| Conta inativa / suspensa                      | `"Account is not activated."`                     |
-
-> Em produção, `message` será sempre `null`. Mapeie o campo `error` e o HTTP status para exibir mensagens amigáveis ao usuário.
+* **Em DEV (Nova senha idêntica à antiga):**
+  * **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"New password cannot be same as old password."` (`throw new BadCredentialsException("New password cannot be same as old password.");`).
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "New password cannot be same as old password.",
+  "trace": [],
+  "path": "/user/changePassword"
+}
+```
+* **Em DEV (Conta inativa):**
+  * **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"Account is not activated."` (`throw new BadCredentialsException("Account is not activated.");`).
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "Account is not activated.",
+  "trace": [],
+  "path": "/user/changePassword"
+}
+```
+* **Em PROD (Qualquer um dos cenários acima):**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
 
 ---
 
@@ -779,6 +1170,246 @@ export async function changePasswordAction(
 
 ---
 
+### 4.6 Consultar Contas de Jogo e Personagens
+
+#### Propósito
+
+Retorna as contas de jogo do Lineage 2 vinculadas ao usuário autenticado, juntamente com a lista de personagens de cada conta.
+
+#### Método e Endpoint
+
+```
+POST /gamer/account
+```
+
+#### Headers
+
+```http
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <seu_jwt_token>
+```
+
+#### Corpo da Requisição (Payload)
+
+*Não requer corpo na requisição. O usuário é identificado pelo JWT.*
+
+#### Respostas Esperadas
+
+**`200 OK` — Consulta bem-sucedida:**
+
+Retorna um objeto onde as chaves são os nomes de login das contas de jogo, e os valores são listas de personagens.
+
+```json
+{
+  "MinhaContaL2": [
+    {
+      "charName": "ElfMaster",
+      "lvl": 40,
+      "maxHp": 1200.5,
+      "maxMp": 800.0,
+      "maxCp": 300.0,
+      "race": 1,
+      "baseClassId": 25,
+      "classId": 26,
+      "exp": 2500000,
+      "karma": 0
+    }
+  ]
+}
+```
+
+---
+
+**`401 Unauthorized` — Token expirado ou Conta inativa:**
+* Ocorre se o JWT for inválido ou a conta da plataforma não estiver ativa.
+* **Exceção no Backend:** Lança `BadCredentialsException` para conta inativa.
+
+---
+
+**`404 Not Found` — Nenhuma conta de jogo vinculada encontrada:**
+* Ocorre se o usuário da plataforma não possuir nenhuma conta de jogo vinculada no banco de dados do emulador.
+* **Exceção no Backend:** Lança `GameAccountNotFoundException` com a mensagem `"No gamer accounts found"` (`throw new GameAccountNotFoundException("No gamer accounts found");`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 404,
+  "error": "NOT_FOUND",
+  "message": "No gamer accounts found",
+  "trace": [],
+  "path": "/gamer/account"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "NOT_FOUND",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+### 4.7 Criar Conta de Jogo
+
+#### Propósito
+
+Cria uma nova conta de jogo no emulador de Lineage 2 e a vincula ao usuário da plataforma.
+
+#### Método e Endpoint
+
+```
+POST /gamer/create
+```
+
+#### Headers
+
+```http
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <seu_jwt_token>
+```
+
+#### Corpo da Requisição (Payload)
+
+```json
+{
+  "login": "meuloginL2",
+  "password": "Senha@Segura1"
+}
+```
+
+| Campo      | Tipo     | Obrigatório | Restrições                                                                 |
+|------------|----------|-------------|----------------------------------------------------------------------------|
+| `login`    | `string` | Sim         | Mínimo 5, máximo 12 caracteres; apenas alfanuméricos (`[a-zA-Z0-9]+`)      |
+| `password` | `string` | Sim         | Validação de complexidade via `@ValidPassword`                             |
+
+#### Respostas Esperadas
+
+**`200 OK` — Conta criada com sucesso:**
+
+```json
+true
+```
+
+---
+
+**`400 Bad Request` — Validação falhou:**
+* Ocorre se o login ou a senha fornecidos não atenderem às restrições.
+* **Exceção no Backend:** Lança `MethodArgumentNotValidException`.
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 400,
+  "error": "BAD_REQUEST",
+  "message": "login: login must be alphanumeric",
+  "trace": null,
+  "path": "/gamer/create"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "BAD_REQUEST",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+**`401 Unauthorized` — Token expirado ou Conta inativa:**
+* **Em DEV (Conta inativa):**
+  * **Exceção no Backend:** Lança `BadCredentialsException` com a mensagem `"Account is not activated"` (`throw new BadCredentialsException("Account is not activated");`).
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 401,
+  "error": "UNAUTHORIZED",
+  "message": "Account is not activated.",
+  "trace": [],
+  "path": "/gamer/create"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "UNAUTHORIZED",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+**`404 Not Found` — Limite de 3 contas de jogo atingido:**
+* Ocorre se o usuário da plataforma já possuir 3 contas de jogo cadastradas (limite máximo).
+* **Exceção no Backend:** Lança `GameAccountNotFoundException` com a mensagem `"You can only have 3 gamer accounts"` (`throw new GameAccountNotFoundException("You can only have 3 gamer accounts");`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 404,
+  "error": "NOT_FOUND",
+  "message": "You can only have 3 gamer accounts",
+  "trace": [],
+  "path": "/gamer/create"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "NOT_FOUND",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+**`404 Not Found` — Login da conta de jogo já existente:**
+* Ocorre se o login de jogo solicitado já estiver cadastrado no emulador.
+* **Exceção no Backend:** Lança `GameAccountNotFoundException` com a mensagem `"Account already exists"` (`throw new GameAccountNotFoundException("Account already exists");`).
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 404,
+  "error": "NOT_FOUND",
+  "message": "Account already exists",
+  "trace": [],
+  "path": "/gamer/create"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "NOT_FOUND",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
 ## 5. Interface Global de Erro (TypeScript)
 
 Copie este arquivo para seu projeto e use em todos os tratamentos de erro da API.
@@ -827,7 +1458,7 @@ export function isApiError(value: unknown): value is ApiError {
 
 ---
 
-## 7. Referência Rápida de Endpoints
+## 6. Referência Rápida de Endpoints
 
 | Método   | Endpoint                  | Autenticação               | Descrição                                     |
 |----------|---------------------------|----------------------------|-----------------------------------------------|
@@ -838,5 +1469,6 @@ export function isApiError(value: unknown): value is ApiError {
 | `POST`   | `/user/me`                | `Bearer token` obrigatório | Retorna os dados do perfil logado             |
 | `POST`   | `/user/setBirthday`       | `Bearer token` obrigatório | Salva a data de nascimento do usuário logado  |
 | `POST`   | `/user/changePassword`    | `Bearer token` obrigatório | Altera a senha do usuário autenticado         |
-| `GET`    | `/gamer/account`          | `Bearer token` obrigatório | Retorna a conta de jogo vinculada             |
+| `POST`   | `/gamer/account`          | `Bearer token` obrigatório | Retorna contas de jogo e personagens vinculados |
+| `POST`   | `/gamer/create`           | `Bearer token` obrigatório | Cria uma nova conta de jogo vinculada         |
 | Qualquer | Demais rotas              | `Bearer token` obrigatório | Rotas protegidas exigem JWT válido            |

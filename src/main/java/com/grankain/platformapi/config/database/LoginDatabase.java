@@ -56,7 +56,7 @@ public class LoginDatabase {
             @Qualifier("loginDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.grankain.platformapi.gamer.domain")
+                .packages("com.grankain.platformapi.gamer.domain.login")
                 .persistenceUnit("LoginPU")
                 .build();
     }

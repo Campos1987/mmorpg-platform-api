@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grankain.platformapi.gamer.dto.request.CreateAccountRequest;
+import com.grankain.platformapi.gamer.dto.response.CharacterStatus;
 import com.grankain.platformapi.gamer.service.GamerAccountService;
 
 import io.micrometer.common.lang.NonNull;
@@ -44,7 +45,7 @@ public class GamerAccountController {
      * @return Login da conta de jogo no emulador Lineage 2.
      */
     @PostMapping("/account")
-    public ResponseEntity<Map<String, List<String>>> getGameAccount(@NonNull @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Map<String, List<CharacterStatus>>> getGameAccount(@NonNull @AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
 
         return ResponseEntity.ok(gamerAccountService.findGameAccount(userId));
@@ -54,10 +55,6 @@ public class GamerAccountController {
     public ResponseEntity<Boolean> createGameAccount(@NonNull @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateAccountRequest request) {
         UUID userId = UUID.fromString(jwt.getSubject());
-
-        System.out.println("teste");
-        System.out.println(request);
-        System.out.println(userId);
 
         return ResponseEntity.ok(gamerAccountService.createGameAccount(userId, request));
     }

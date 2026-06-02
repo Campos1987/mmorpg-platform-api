@@ -49,6 +49,8 @@ Padrões aplicados: Constructor Injection, Rich Domain Model, Value Objects (`@E
 | `POST` | `/auth/login` | Pública | Autentica e retorna JWT (1h) |
 | `GET` | `/actuator/health` | Pública | Health check |
 | `GET` | `/posts/**` | Pública | Leitura de posts/eventos |
+| `POST` | `/gamer/account` | `Bearer <token>` | Retorna contas de jogo e personagens vinculados |
+| `POST` | `/gamer/create` | `Bearer <token>` | Cria uma nova conta de jogo vinculada |
 | Qualquer | Demais rotas | `Bearer <token>` | Rotas protegidas |
 
 ---

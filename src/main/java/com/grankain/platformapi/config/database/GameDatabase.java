@@ -56,7 +56,7 @@ public class GameDatabase {
             @Qualifier("gameDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.grankain.platformapi.gamer.domain")
+                .packages("com.grankain.platformapi.gamer.domain.game")
                 .persistenceUnit("GamePU")
                 .build();
     }
