@@ -136,7 +136,7 @@ com.grankain.platformapi
 │   └── service/                   # GamerAccountService
 │
 ├── config/
-│   ├── database/                  # WebDatabase e LoginDatabase Configs
+│   ├── database/                  # WebDatabase, LoginDatabase e GameDatabase Configs
 │
 ├── infra/                         # Cross-cutting de infraestrutura
 │   ├── exception/                 # GlobalExceptionHandler + DTOs de erro
@@ -216,8 +216,8 @@ As tabelas **não possuem FK entre si**. Bloqueio por conta e por IP são mecani
 
 ### 4.3 Persistência
 
-- **Banco:** MySQL (`gk_web_user`), container externo `mysql-l2_game`.
-- **Configuração:** `LoginDatabase` e `WebDatabase` definem transações e EntityManagerFactories separadas para `db-login` e `db-web`.
+- **Banco:** MySQL, container externo `mysql-l2_game` (com instâncias l2-game, l2-login e l2-web).
+- **Configuração:** `LoginDatabase`, `WebDatabase` e `GameDatabase` definem transações e EntityManagerFactories separadas para `db-login`, `db-web` e `db-game`.
 - **Repositórios:** isolados nos pacotes `user.repository` e `gamer.repository`.
 - **Lock pessimista:** `BlockIpUserRepository.findWithLockByIpUser` para concorrência em contadores de IP.
 
@@ -405,15 +405,20 @@ Provider: Bouncy Castle (`bcprov-jdk18on` 1.84).
 flowchart TB
     subgraph docker_network [Rede mmorpg-net — externa]
         API[Container mmorpg-api<br/>:4000]
-        MYSQL[Container mysql-l2_game<br/>:3306]
+        GAME[Container l2-game]
+        LOGIN[Container l2-login]
+        WEB[Container l2-web]
     end
 
     HOST[Host :4000] --> API
-    API -->|JDBC| MYSQL
+    API -->|JDBC| GAME
+    API -->|JDBC| LOGIN
+    API -->|JDBC| WEB
 ```
 
 - **Compose:** `docker-compose.yml` gerencia apenas a API.
-- **Banco:** container `mysql-l2_game` e rede `mmorpg-net` são pré-requisitos externos.
+- **Banco:** Os containers de banco de dados (`l2-game`, `l2-login`, `l2-web`) e a rede `mmorpg-net` são pré-requisitos externos.
+  - *Nota:* Caso os containers de banco de dados tenham sido instanciados em sub-redes isoladas de outros projetos Compose, eles devem ser conectados à rede `mmorpg-net` usando `docker network connect mmorpg-net <nome_do_container>`.
 - **Imagem:** build multi-stage; processo executado como usuário não-root (`appuser`).
 
 ### 8.2 Variáveis de ambiente

@@ -16,14 +16,20 @@ import jakarta.validation.constraints.Size;
  * de eles chegarem à camada de Service.
  */
 public record RegisterRequest(
-                @NotBlank(message = "Username é obrigatório") @ValidUser
+                @NotBlank(message = "Username é obrigatório")
+                @ValidUser
                 String user,
 
-                @NotBlank @Size(min = 1, max = 15) @Pattern(regexp = "^[a-zA-ZÀ-ÿ ]+$", message = "O nome deve conter apenas letras.") String name,
+                @NotBlank @Size(min = 1, max = 15)
+                @Pattern(regexp = "^[a-zA-ZÀ-ÿ ]+$", message = "O nome deve conter apenas letras.")
+                String name,
 
-                @NotBlank @Size(min = 1, max = 15) @Pattern(regexp = "^[a-zA-ZÀ-ÿ ]+$", message = "O sobrenome deve conter apenas letras.") String lastname,
+                @NotBlank @Size(min = 1, max = 15)
+                @Pattern(regexp = "^[a-zA-ZÀ-ÿ ]+$", message = "O sobrenome deve conter apenas letras.")
+                String lastname,
 
-                @NotBlank @Email(message = "E-mail com formato inválido") @Size(max = 100) String email,
+                @NotBlank @Email(message = "E-mail com formato inválido") @Size(max = 100)
+                String email,
 
                 @ValidPassword
                 String password

@@ -58,7 +58,13 @@ Padrões aplicados: Constructor Injection, Rich Domain Model, Value Objects (`@E
 ### Pré-requisitos
 
 - Docker Engine 24+ e Docker Compose v2
-- Container MySQL (`mysql-l2_game`) rodando na rede Docker `mmorpg-net`
+- Containers MySQL (`l2-game`, `l2-login`, `l2-web`) rodando e associados à rede Docker `mmorpg-net`
+  - *Nota:* Se os containers do banco de dados foram iniciados por outros projetos Compose, eles podem estar em redes isoladas (ex: `game_mmorpg-net`). Você **deve** conectá-los à rede compartilhada executando:
+    ```bash
+    docker network connect mmorpg-net l2-game
+    docker network connect mmorpg-net l2-login
+    docker network connect mmorpg-net l2-web
+    ```
 - *(Opcional)* Java 21+ e Maven para execução local sem Docker
 
 ### 1. Configurar variáveis de ambiente
@@ -143,11 +149,10 @@ export JWT_SECRET_KEY=SUA_CHAVE_SECRETA
 
 | Arquivo | Conteúdo |
 |---|---|
-| [`documentation/technical-overview-v2.md`](documentation/technical-overview-v2.md) | Documentação técnica completa (arquitetura, modelagem, segurança, getting started) |
+| [`documentation/technical-overview.md`](documentation/technical-overview.md) | Documentação técnica completa (arquitetura, modelagem, segurança, getting started) |
 | [`documentation/api-integration-guide-frontend.md`](documentation/api-integration-guide-frontend.md) | Guia de integração para o time de Frontend (Next.js/TypeScript) com interfaces TS |
-| [`documentation/architecture.md`](documentation/architecture.md) | Visão de camadas e padrões |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Visão de camadas e padrões de arquitetura do projeto |
 | [`documentation/security.md`](documentation/security.md) | Políticas de autenticação e proteção de dados |
-| [`documentation/api_endpoints.md`](documentation/api_endpoints.md) | Referência rápida de endpoints |
 
 ---
 

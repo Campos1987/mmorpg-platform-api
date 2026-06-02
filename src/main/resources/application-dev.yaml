@@ -10,6 +10,10 @@ spring:
       url: ${LOGIN_DB_URL:jdbc:mysql://localhost:3306/l2_login?useSSL=false&serverTimezone=UTC}
       username: ${LOGIN_DB_USER:root}
       password: ${LOGIN_DB_PASS:ehc6001}
+    game:
+      url: ${GAME_DB_URL:jdbc:mysql://localhost:3306/l2_game?useSSL=false&serverTimezone=UTC}
+      username: ${GAME_DB_USER:root}
+      password: ${GAME_DB_PASS:ehc6001}
   jpa:
     hibernate:
       ddl-auto: update

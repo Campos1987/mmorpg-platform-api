@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import jakarta.persistence.EntityManagerFactory;
 
 /**
- * Configuração JPA para o banco db-login (autenticação e usuários).
+ * Configuração JPA para o banco db-Game (autenticação e usuários).
  * <p>
  * Define os Beans necessários para conexão, gerenciamento de entidades e
  * transações
@@ -27,46 +27,46 @@ import jakarta.persistence.EntityManagerFactory;
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.grankain.platformapi.gamer.repository.login", entityManagerFactoryRef = "loginEntityManagerFactory", transactionManagerRef = "loginTransactionManager")
-public class LoginDatabase {
+@EnableJpaRepositories(basePackages = "com.grankain.platformapi.gamer.repository.game", entityManagerFactoryRef = "gameEntityManagerFactory", transactionManagerRef = "gameTransactionManager")
+public class GameDatabase {
 
     /**
-     * Propriedades de conexão do banco "dbLogin" lidas do application.yaml.
+     * Propriedades de conexão do banco "dbGame" lidas do application.yaml.
      */
     @Bean
-    @ConfigurationProperties("spring.datasource.login")
-    public DataSourceProperties loginDataSourceProperties() {
+    @ConfigurationProperties("spring.datasource.game")
+    public DataSourceProperties gameDataSourceProperties() {
         return new DataSourceProperties();
     }
 
     /**
-     * Cria o DataSource específico para o banco de Login.
+     * Cria o DataSource específico para o banco de Game.
      */
     @Bean
-    public DataSource loginDataSource() {
-        return loginDataSourceProperties().initializeDataSourceBuilder().build();
+    public DataSource gameDataSource() {
+        return gameDataSourceProperties().initializeDataSourceBuilder().build();
     }
 
     /**
      * Cria o EntityManagerFactory que vai gerenciar as entidades de autenticação.
      */
     @Bean
-    public LocalContainerEntityManagerFactoryBean loginEntityManagerFactory(
+    public LocalContainerEntityManagerFactoryBean gameEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
-            @Qualifier("loginDataSource") DataSource dataSource) {
+            @Qualifier("gameDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
                 .packages("com.grankain.platformapi.gamer.domain")
-                .persistenceUnit("LoginPU")
+                .persistenceUnit("GamePU")
                 .build();
     }
 
     /**
-     * Gerenciador de transações associado ao banco de Login.
+     * Gerenciador de transações associado ao banco de Game.
      */
     @Bean
-    public PlatformTransactionManager loginTransactionManager(
-            @Qualifier("loginEntityManagerFactory") EntityManagerFactory emf) {
+    public PlatformTransactionManager gameTransactionManager(
+            @Qualifier("gameEntityManagerFactory") EntityManagerFactory emf) {
         Objects.requireNonNull(emf, "object cannot be null.");
 
         return new JpaTransactionManager(emf);

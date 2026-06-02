@@ -36,6 +36,11 @@ services:
       LOGIN_DB_USER: root
       LOGIN_DB_PASS: ehc6001
 
+      # Banco Game
+      GAME_DB_URL: jdbc:mysql://l2-game:3306/l2_game?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      GAME_DB_USER: root
+      GAME_DB_PASS: ehc6001
+
       # Origens permitidas no CORS (frontend)
       SPRING_APPLICATION_CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
 

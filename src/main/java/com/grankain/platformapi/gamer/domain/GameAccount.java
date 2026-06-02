@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Entidade JPA que representa uma conta de jogo no banco de dados do emulador Lineage 2.
@@ -27,6 +28,7 @@ public class GameAccount {
      * Sincronizado logicamente com {@code PlatformUser} pelo campo {@code accountId}.
      */
     @Id
+    @Setter
     @Column(name = "login", nullable = false)
     private String login;
 
@@ -34,9 +36,11 @@ public class GameAccount {
      * Vínculo lógico com a conta da plataforma web (PlatformUser.id).
      * Não há FK no banco pois as tabelas estão em bancos de dados distintos.
      */
+    @Setter
     @Column(name = "account_id", nullable = false)
     private UUID accountId;
 
+    @Setter
     @Column(name = "password", nullable = false)
     private String password;
 

@@ -536,9 +536,16 @@ USER appuser
 | Docker Engine | 24+ | Para build e execução containerizada |
 | Docker Compose | v2 (plugin) | `docker compose` (sem hífen) |
 | Java JDK | 21 (opcional) | Necessário apenas para execução local fora do Docker |
-| MySQL | 8.0+ | Container externo `mysql-l2_game` na rede `mmorpg-net` |
+| MySQL | 8.0+ | Containers externos (`l2-game`, `l2-login`, `l2-web`) associados à rede `mmorpg-net` |
 
-> **Pré-requisito de infraestrutura:** O container MySQL (`mysql-l2_game`) e a rede Docker (`mmorpg-net`) devem estar em execução antes de iniciar a API. A rede é gerenciada externamente por outro Compose.
+> **Pré-requisito de infraestrutura:** Os containers MySQL e a rede Docker `mmorpg-net` devem estar em execução antes de iniciar a API.
+> 
+> ⚠️ **Importante (Resolução de rede):** Se os containers do banco de dados foram criados em outras pastas/projetos Docker Compose, eles podem estar em sub-redes separadas (como `game_mmorpg-net`). Para que o container `mmorpg-api` consiga se comunicar com eles, você deve conectá-los à rede `mmorpg-net` executando:
+> ```bash
+> docker network connect mmorpg-net l2-game
+> docker network connect mmorpg-net l2-login
+> docker network connect mmorpg-net l2-web
+> ```
 
 ### 6.2 Clonando o Repositório
 

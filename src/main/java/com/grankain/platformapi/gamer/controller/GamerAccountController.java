@@ -1,17 +1,22 @@
 package com.grankain.platformapi.gamer.controller;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.grankain.platformapi.gamer.dto.request.CreateAccountRequest;
 import com.grankain.platformapi.gamer.service.GamerAccountService;
 
 import io.micrometer.common.lang.NonNull;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,11 +43,22 @@ public class GamerAccountController {
      * @param jwt Token JWT extraído automaticamente pelo Spring Security.
      * @return Login da conta de jogo no emulador Lineage 2.
      */
-    @GetMapping("/account")
-    public ResponseEntity<String> getGameAccount(@NonNull @AuthenticationPrincipal Jwt jwt) {
+    @PostMapping("/account")
+    public ResponseEntity<Map<String, List<String>>> getGameAccount(@NonNull @AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
 
-        log.info("Fetching game account for userId={}", userId);
         return ResponseEntity.ok(gamerAccountService.findGameAccount(userId));
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<Boolean> createGameAccount(@NonNull @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody CreateAccountRequest request) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        System.out.println("teste");
+        System.out.println(request);
+        System.out.println(userId);
+
+        return ResponseEntity.ok(gamerAccountService.createGameAccount(userId, request));
     }
 }

@@ -6,7 +6,7 @@ A segurança é uma prioridade central neste projeto, implementada através do *
 
 - **Spring Security**: Configurado em `SecurityConfig.java`.
 - **Estratégia Stateless**: A API é configurada como stateless (`SessionCreationPolicy.STATELESS`), ideal para escalabilidade e uso com JWT.
-- **HTTP Basic**: Atualmente utilizado para testes e desenvolvimento inicial. Planejado para migração para **JWT (JSON Web Token)**.
+- **JWT (JSON Web Token)**: Autenticação via tokens JWT (HS256) emitidos após login bem-sucedido, validados em rotas protegidas pelo Resource Server do Spring Security.
 - **CORS (Cross-Origin Resource Sharing)**: Configuração robusta para permitir chamadas apenas de origens autorizadas (lidas de variáveis de ambiente).
 
 ## Proteção de Dados

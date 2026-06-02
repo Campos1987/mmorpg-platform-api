@@ -12,6 +12,11 @@ spring:
       username: ${LOGIN_DB_USER}
       password: ${LOGIN_DB_PASS}
       driver-class-name: com.mysql.cj.jdbc.Driver
+    game:
+      url: ${GAME_DB_URL}
+      username: ${GAME_DB_USER}
+      password: ${GAME_DB_PASS}
+      driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: validate

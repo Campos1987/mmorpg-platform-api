@@ -39,6 +39,7 @@ build/
 dockerfile
 
 /src/main/resources/application-dev.yaml
+/src/main/resources/application-prod.yaml
 ajustar-em-prod.txt
 # Ignorar chaves sensiveis
 *.pem
