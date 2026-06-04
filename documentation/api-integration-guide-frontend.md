@@ -1213,7 +1213,8 @@ Retorna um objeto onde as chaves são os nomes de login das contas de jogo, e os
       "baseClassId": 25,
       "classId": 26,
       "exp": 2500000,
-      "karma": 0
+      "karma": 0,
+      "isOnline": 0
     }
   ]
 }

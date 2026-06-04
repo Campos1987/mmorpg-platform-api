@@ -413,7 +413,8 @@ Retorna um mapa onde as chaves são os logins das contas do jogo (ex: `GankMaste
       "baseClassId": 1,
       "classId": 2,
       "exp": 1000000,
-      "karma": 0
+      "karma": 0,
+      "isOnline": 0
     }
   ]
 }

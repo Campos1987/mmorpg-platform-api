@@ -15,8 +15,11 @@ spring:
       username: ${GAME_DB_USER:root}
       password: ${GAME_DB_PASS:ehc6001}
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   jwt:
     secret: ${JWT_SECRET_KEY:8fK2vW9xZ4mQ7tN1sJ5cR3vF8xY0eU2iO6pW1bE9zAs=}
 

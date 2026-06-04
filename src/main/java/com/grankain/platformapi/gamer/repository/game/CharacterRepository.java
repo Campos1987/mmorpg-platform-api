@@ -7,8 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.grankain.platformapi.gamer.domain.game.Character;
 
-public interface CharacterRepository extends JpaRepository<Character, String> {
+public interface CharacterRepository extends JpaRepository<Character, Integer> {
 
     @Query("SELECT c FROM Character c WHERE c.accountName = :accountName")
     List<Character> findAllByAccountName(String accountName);
+
+    Character findByCharId(int charId);
+
+    Character findByCharName(String charName);
 }

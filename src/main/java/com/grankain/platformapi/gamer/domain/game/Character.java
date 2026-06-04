@@ -13,6 +13,9 @@ import lombok.Getter;
 public class Character {
 
     @Id
+    @Column(name = "charId", nullable = false)
+    private int charId;
+
     @Column(name = "char_name", nullable = false)
     private String charName;
 
@@ -54,4 +57,8 @@ public class Character {
     @NotNull
     @Column(name = "karma", nullable = false)
     private int karma;
+
+    @NotNull
+    @Column(name = "online", nullable = false)
+    private int isOnline;
 }

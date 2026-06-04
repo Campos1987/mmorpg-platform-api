@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grankain.platformapi.gamer.dto.request.CreateAccountRequest;
+import com.grankain.platformapi.gamer.dto.request.FindCharacterRequest;
 import com.grankain.platformapi.gamer.dto.response.CharacterStatus;
+import com.grankain.platformapi.gamer.service.CharacterService;
 import com.grankain.platformapi.gamer.service.GamerAccountService;
 
 import io.micrometer.common.lang.NonNull;
@@ -33,9 +35,11 @@ import lombok.extern.slf4j.Slf4j;
 public class GamerAccountController {
 
     private final GamerAccountService gamerAccountService;
+    private final CharacterService characterService;
 
-    public GamerAccountController(GamerAccountService gamerAccountService) {
+    public GamerAccountController(GamerAccountService gamerAccountService, CharacterService characterService) {
         this.gamerAccountService = gamerAccountService;
+        this.characterService = characterService;
     }
 
     /**
@@ -49,6 +53,16 @@ public class GamerAccountController {
         UUID userId = UUID.fromString(jwt.getSubject());
 
         return ResponseEntity.ok(gamerAccountService.findGameAccount(userId));
+    }
+
+    @PostMapping("/findCharacters")
+    public ResponseEntity<CharacterStatus> findCharacter(@NonNull @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody FindCharacterRequest request) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        log.info("findCharacter request: {}", request);
+
+        return ResponseEntity.ok(characterService.findCharacter(userId, request));
     }
 
     @PostMapping("/create")
