@@ -1,8 +1,7 @@
 package com.grankain.platformapi.gamer.service;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -11,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.grankain.platformapi.gamer.domain.login.LoginGameAccount;
 import com.grankain.platformapi.gamer.dto.request.CreateAccountRequest;
+import com.grankain.platformapi.gamer.dto.response.AccountCharactersResponse;
 import com.grankain.platformapi.gamer.dto.response.CharacterStatus;
 import com.grankain.platformapi.gamer.exceptions.GameAccountNotFoundException;
 import com.grankain.platformapi.gamer.repository.login.LoginAccountRepository;
@@ -50,24 +50,30 @@ public class GamerAccountService {
      * @throws GameAccountNotFoundException se nenhuma conta de jogo for encontrada.
      */
     @Transactional(readOnly = true, transactionManager = "loginTransactionManager")
-    public Map<String, List<CharacterStatus>> findGameAccount(UUID accountId) {
-        Objects.requireNonNull(accountId, "Account ID is required.");
+    public List<AccountCharactersResponse> findGameAccount(UUID ownerId) {
+        Objects.requireNonNull(ownerId, "Account ID is required.");
 
-        List<LoginGameAccount> accounts = loginAccountRepository.findByAccountId(accountId);
+        List<LoginGameAccount> accounts = loginAccountRepository.findByOwnerId(ownerId);
 
         if (accounts.isEmpty()) {
             throw new GameAccountNotFoundException(
                     "No gamer accounts found");
         }
 
-        Map<String, List<CharacterStatus>> charactersByAccount = new HashMap<>();
+        List<AccountCharactersResponse> charactersByAccount = new ArrayList<>();
 
         for (LoginGameAccount account : accounts) {
-            String login = account.getLogin();
+            //Busca personagens
+            List<CharacterStatus> characters = characterService.findAllCharacters(account.getLogin());
 
-            List<CharacterStatus> characters = characterService.findAllCharacters(login);
-
-            charactersByAccount.put(login, characters);
+            //Busca informações da conta
+            AccountCharactersResponse accountStatus = new AccountCharactersResponse(
+                account.getAccountId(),
+                account.getLogin(),
+                account.getAccessLevel(),
+                characters
+            );
+            charactersByAccount.add(accountStatus);
         }
 
         return charactersByAccount;
@@ -77,10 +83,10 @@ public class GamerAccountService {
     public Boolean createGameAccount(UUID accountId, CreateAccountRequest request) {
         
         PlatformUser user = userSecurity.checkUserStatus(accountId);
-        UUID userId = user.getId();
+        UUID ownerId = user.getId();
 
         
-        List<LoginGameAccount> accounts = loginAccountRepository.findByAccountId(userId);
+        List<LoginGameAccount> accounts = loginAccountRepository.findByOwnerId(ownerId);
 
         if (accounts.size() > 2) {
             throw new GameAccountNotFoundException(
@@ -94,13 +100,45 @@ public class GamerAccountService {
                     "Account already exists");
         }
 
-        LoginGameAccount gameAccount = new LoginGameAccount();
-        gameAccount.setAccountId(userId);
-        gameAccount.setLogin(request.login());
-        gameAccount.setPassword(request.password());
+        LoginGameAccount gameAccount = LoginGameAccount.builder()
+            .login(request.login())
+            .password(request.password())
+            .ownerId(ownerId)
+            .accessLevel(0)
+            .build();
+        
+        log.info("Game account: {}", gameAccount);
 
+        Objects.requireNonNull(gameAccount, "Game account is required.");
         loginAccountRepository.save(gameAccount);
 
         return true;
+    }
+
+    @Transactional(transactionManager = "loginTransactionManager")
+    public Boolean blockAccount(UUID accountId, String accountIdBlock){
+        PlatformUser user = userSecurity.checkUserStatus(accountId);
+        UUID ownerId = user.getId();
+        UUID idBlock = UUID.fromString(accountIdBlock);
+
+        //Verifica se a conta esta vinculada ao usuário
+        List<LoginGameAccount> blockedAccount = loginAccountRepository.findByOwnerId(ownerId);
+
+        for(LoginGameAccount account : blockedAccount) {
+            if(account.getAccountId().equals(idBlock) && account.getAccessLevel() >= 0){
+                account.setOldAccessLevel(account.getAccessLevel());
+                account.setAccessLevel(-10);
+                loginAccountRepository.save(account);
+                return true;
+            } 
+            if(account.getAccountId().equals(idBlock) && account.getAccessLevel() == -10){
+                account.setAccessLevel(account.getOldAccessLevel());
+                loginAccountRepository.save(account);
+                return true;
+            }
+        }
+        
+        throw new GameAccountNotFoundException(
+                    "Account not found");
     }
 }

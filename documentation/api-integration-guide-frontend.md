@@ -1198,26 +1198,34 @@ Authorization: Bearer <seu_jwt_token>
 
 **`200 OK` — Consulta bem-sucedida:**
 
-Retorna um objeto onde as chaves são os nomes de login das contas de jogo, e os valores são listas de personagens.
+Retorna uma lista contendo as contas de jogo e seus respectivos personagens.
 
 ```json
-{
-  "MinhaContaL2": [
-    {
-      "charName": "ElfMaster",
-      "lvl": 40,
-      "maxHp": 1200.5,
-      "maxMp": 800.0,
-      "maxCp": 300.0,
-      "race": 1,
-      "baseClassId": 25,
-      "classId": 26,
-      "exp": 2500000,
-      "karma": 0,
-      "isOnline": 0
-    }
-  ]
-}
+[
+  {
+    "accountId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+    "login": "MinhaContaL2",
+    "accessLevel": 0,
+    "characters": [
+      {
+        "accountName": "MinhaContaL2",
+        "charId": 100002,
+        "charName": "ElfMaster",
+        "lvl": 40,
+        "maxHp": 1200.5,
+        "maxMp": 800.0,
+        "maxCp": 300.0,
+        "sex": 0,
+        "race": 1,
+        "baseClassId": 25,
+        "classId": 26,
+        "exp": 2500000,
+        "karma": 0,
+        "isOnline": 0
+      }
+    ]
+  }
+]
 ```
 
 ---
@@ -1420,28 +1428,24 @@ Retorna os dados detalhados de um personagem específico por ID (ex: Ragnar). Po
 #### Método e Endpoint
 
 ```
-POST /gamer/findCharacters
+GET /gamer/findCharacters/{charId}
 ```
 
 #### Headers
 
 ```http
-Content-Type: application/json
-Accept: application/json
 Authorization: Bearer <seu_jwt_token>
 ```
 
+#### Parâmetros de Path
+
+| Parâmetro | Tipo     | Obrigatório | Descrição                                 |
+|-----------|----------|-------------|-------------------------------------------|
+| `charId`  | `string` | Sim         | ID numérico do personagem (ex: "100002")  |
+
 #### Corpo da Requisição (Payload)
 
-```json
-{
-  "charId": "100002"
-}
-```
-
-| Campo    | Tipo     | Obrigatório | Restrições                                                                 |
-|----------|----------|-------------|----------------------------------------------------------------------------|
-| `charId` | `string` | Sim         | ID numérico do personagem (ex: "100002")                                   |
+*Não requer corpo na requisição. O ID do personagem é passado diretamente no path da URL.*
 
 #### Respostas Esperadas
 
@@ -1456,6 +1460,7 @@ Authorization: Bearer <seu_jwt_token>
   "maxHp": 9800.0,
   "maxMp": 1700.0,
   "maxCp": 4600.0,
+  "sex": 0,
   "race": 0,
   "baseClassId": 91,
   "classId": 91,
@@ -1484,7 +1489,7 @@ Authorization: Bearer <seu_jwt_token>
   "error": "FORBIDDEN",
   "message": "You do not own this character.",
   "trace": [],
-  "path": "/gamer/findCharacters"
+  "path": "/gamer/findCharacters/100002"
 }
 ```
 * **Em PROD:**
@@ -1512,7 +1517,7 @@ Authorization: Bearer <seu_jwt_token>
   "error": "NOT_FOUND",
   "message": "Character not found.",
   "trace": [],
-  "path": "/gamer/findCharacters"
+  "path": "/gamer/findCharacters/100002"
 }
 ```
 * **Em PROD:**
@@ -1529,14 +1534,91 @@ Authorization: Bearer <seu_jwt_token>
 
 ---
 
-#### TypeScript — Interfaces para este Endpoint
+### 4.9 Bloquear/Desbloquear Conta de Jogo
+
+#### Propósito
+
+Bloqueia ou desbloqueia temporariamente uma conta de jogo do Lineage 2 vinculada ao usuário autenticado.
+O endpoint funciona como uma alternância (toggle): se a conta estiver ativa (accessLevel >= 0), ela será bloqueada (accessLevel alterado para -10) e o nível de acesso anterior será salvo. Se a conta já estiver bloqueada (accessLevel == -10), o acesso anterior será restaurado.
+
+#### Método e Endpoint
+
+```
+GET /gamer/block/{accountIdBlock}
+```
+
+#### Headers
+
+```http
+Authorization: Bearer <seu_jwt_token>
+```
+
+#### Parâmetros de Path
+
+| Parâmetro        | Tipo     | Obrigatório | Descrição                                                        |
+|------------------|----------|-------------|------------------------------------------------------------------|
+| `accountIdBlock` | `string` | Sim         | ID UUID da conta de jogo a ser bloqueada/desbloqueada            |
+
+#### Corpo da Requisição (Payload)
+
+*Não requer corpo na requisição.*
+
+#### Respostas Esperadas
+
+**`200 OK` — Operação realizada com sucesso:**
+
+Retorna `true` se a conta de jogo foi bloqueada ou desbloqueada.
+
+```json
+true
+```
+
+---
+
+**`401 Unauthorized` — Token expirado ou Conta inativa:**
+* Ocorre se o JWT for inválido ou a conta da plataforma não estiver ativa.
+
+---
+
+**`404 Not Found` — Conta de jogo não encontrada:**
+* Ocorre se a conta de jogo informada não existir ou não estiver vinculada ao usuário autenticado.
+* **Exceção no Backend:** Lança `GameAccountNotFoundException` com a mensagem `"Account not found"`.
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 404,
+  "error": "NOT_FOUND",
+  "message": "Account not found",
+  "trace": [],
+  "path": "/gamer/block/e4b6c8d0-55e1-4cfa-888e-5b123d456789"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "NOT_FOUND",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+#### TypeScript — Interfaces para este Domínio
 
 ```typescript
 // types/gamer.ts
 
-/** Payload enviado no corpo da requisição de findCharacters */
-export interface FindCharacterRequest {
-    charId: string;
+/** Resposta de sucesso do endpoint POST /gamer/account */
+export interface AccountCharactersResponse {
+    accountId: string;
+    login: string;
+    accessLevel: number;
+    characters: CharacterStatus[];
 }
 
 /** Resposta de sucesso contendo os detalhes do personagem */
@@ -1548,6 +1630,7 @@ export interface CharacterStatus {
     maxHp: number;
     maxMp: number;
     maxCp: number;
+    sex: number;
     race: number;
     baseClassId: number;
     classId: number;
@@ -1609,16 +1692,17 @@ export function isApiError(value: unknown): value is ApiError {
 
 ## 6. Referência Rápida de Endpoints
 
-| Método   | Endpoint                  | Autenticação               | Descrição                                     |
-|----------|---------------------------|----------------------------|-----------------------------------------------|
-| `POST`   | `/auth/register`          | Pública                    | Registra uma nova conta de jogador            |
-| `POST`   | `/auth/login`             | Pública                    | Autentica e retorna JWT                       |
-| `GET`    | `/actuator/health`        | Pública                    | Health check do servidor                      |
-| `GET`    | `/posts/**`               | Pública                    | Leitura de posts, eventos e notícias          |
-| `POST`   | `/user/me`                | `Bearer token` obrigatório | Retorna os dados do perfil logado             |
-| `POST`   | `/user/setBirthday`       | `Bearer token` obrigatório | Salva a data de nascimento do usuário logado  |
-| `POST`   | `/user/changePassword`    | `Bearer token` obrigatório | Altera a senha do usuário autenticado         |
-| `POST`   | `/gamer/account`          | `Bearer token` obrigatório | Retorna contas de jogo e personagens vinculados |
-| `POST`   | `/gamer/findCharacters`   | `Bearer token` obrigatório | Busca um personagem por ID (com validação de posse) |
-| `POST`   | `/gamer/create`           | `Bearer token` obrigatório | Cria uma nova conta de jogo vinculada         |
-| Qualquer | Demais rotas              | `Bearer token` obrigatório | Rotas protegidas exigem JWT válido            |
+| Método   | Endpoint                        | Autenticação               | Descrição                                           |
+|----------|---------------------------------|----------------------------|-----------------------------------------------------|
+| `POST`   | `/auth/register`                | Pública                    | Registra uma nova conta de jogador                  |
+| `POST`   | `/auth/login`                   | Pública                    | Autentica e retorna JWT                             |
+| `GET`    | `/actuator/health`              | Pública                    | Health check do servidor                            |
+| `GET`    | `/posts/**`                     | Pública                    | Leitura de posts, eventos e notícias                |
+| `POST`   | `/user/me`                      | `Bearer token` obrigatório | Retorna os dados do perfil logado                   |
+| `POST`   | `/user/setBirthday`             | `Bearer token` obrigatório | Salva a data de nascimento do usuário logado        |
+| `POST`   | `/user/changePassword`          | `Bearer token` obrigatório | Altera a senha do usuário autenticado               |
+| `POST`   | `/gamer/account`                | `Bearer token` obrigatório | Retorna contas de jogo e personagens vinculados     |
+| `GET`    | `/gamer/findCharacters/{charId}`| `Bearer token` obrigatório | Busca um personagem por ID (com validação de posse) |
+| `POST`   | `/gamer/create`                 | `Bearer token` obrigatório | Cria uma nova conta de jogo vinculada               |
+| `GET`    | `/gamer/block/{accountIdBlock}` | `Bearer token` obrigatório | Bloqueia ou desbloqueia temporariamente uma conta   |
+| Qualquer | Demais rotas                    | `Bearer token` obrigatório | Rotas protegidas exigem JWT válido                  |

@@ -14,7 +14,7 @@ public class Character {
 
     @Id
     @Column(name = "charId", nullable = false)
-    private int charId;
+    private Integer charId;
 
     @Column(name = "char_name", nullable = false)
     private String charName;
@@ -24,7 +24,7 @@ public class Character {
 
     @NotNull
     @Column(name = "level", nullable = false)
-    private int lvl;
+    private Integer lvl;
 
     @NotNull
     @Column(name = "maxhp", nullable = false)
@@ -39,16 +39,20 @@ public class Character {
     private float maxCp;
 
     @NotNull
+    @Column(name = "sex", nullable = false)
+    private Integer sex;
+
+    @NotNull
     @Column(name = "race", nullable = false)
-    private int race;
+    private Integer race;
 
     @NotNull
     @Column(name = "base_classid", nullable = false)
-    private int baseClassId;
+    private Integer baseClassId;
 
     @NotNull
     @Column(name = "classid", nullable = false)
-    private int classId;
+    private Integer classId;
 
     @NotNull
     @Column(name = "exp", nullable = false)
@@ -56,9 +60,9 @@ public class Character {
 
     @NotNull
     @Column(name = "karma", nullable = false)
-    private int karma;
+    private Integer karma;
 
     @NotNull
     @Column(name = "online", nullable = false)
-    private int isOnline;
+    private Integer isOnline;
 }

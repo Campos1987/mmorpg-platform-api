@@ -398,26 +398,34 @@ Os endpoints abaixo exigem `Authorization: Bearer <jwt_token>` em todas as requi
 
 **Response — HTTP 200 OK:**
 
-Retorna um mapa onde as chaves são os logins das contas do jogo (ex: `GankMaster`), e os valores são as listas de personagens dessa conta.
+Retorna uma lista com as contas de jogo vinculadas e os seus respectivos personagens.
 
 ```json
-{
-  "GankMaster": [
-    {
-      "charName": "Hero",
-      "lvl": 80,
-      "maxHp": 3000,
-      "maxMp": 1000,
-      "maxCp": 500,
-      "race": 0,
-      "baseClassId": 1,
-      "classId": 2,
-      "exp": 1000000,
-      "karma": 0,
-      "isOnline": 0
-    }
-  ]
-}
+[
+  {
+    "accountId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+    "login": "MinhaContaL2",
+    "accessLevel": 0,
+    "characters": [
+      {
+        "accountName": "MinhaContaL2",
+        "charId": 100002,
+        "charName": "Hero",
+        "lvl": 80,
+        "maxHp": 3000.0,
+        "maxMp": 1000.0,
+        "maxCp": 500.0,
+        "sex": 0,
+        "race": 0,
+        "baseClassId": 1,
+        "classId": 2,
+        "exp": 1000000,
+        "karma": 0,
+        "isOnline": 0
+      }
+    ]
+  }
+]
 ```
 
 ---
@@ -442,21 +450,15 @@ Retorna um mapa onde as chaves são os logins das contas do jogo (ex: `GankMaste
 
 ---
 
-#### `POST /gamer/findCharacters` — Busca detalhes de um personagem por ID
+#### `GET /gamer/findCharacters/{charId}` — Busca detalhes de um personagem por ID
 
-Busca os detalhes e o status atual de um personagem específico. Por segurança, o sistema valida se a conta de jogo proprietária do personagem pertence ao usuário autenticado (UUID do JWT).
+Busca os detalhes e o status atual de um personagem específico por ID na URL. Por segurança, o sistema valida se a conta de jogo proprietária do personagem pertence ao usuário autenticado (UUID do JWT).
 
-**Request Body:**
+**Parâmetros de Path:**
 
-```json
-{
-  "charId": "100002"
-}
-```
-
-| Campo | Tipo | Validações |
+| Parâmetro | Tipo | Validações / Descrição |
 |---|---|---|
-| `charId` | `String` | `@NotNull` (ID numérico do personagem no banco) |
+| `charId` | `String` | ID numérico do personagem (ex: "100002") |
 
 **Response — HTTP 200 OK:**
 
@@ -469,6 +471,7 @@ Busca os detalhes e o status atual de um personagem específico. Por segurança,
   "maxHp": 9800.0,
   "maxMp": 1700.0,
   "maxCp": 4600.0,
+  "sex": 0,
   "race": 0,
   "baseClassId": 91,
   "classId": 91,
@@ -484,7 +487,28 @@ Busca os detalhes e o status atual de um personagem específico. Por segurança,
 |---|---|---|---|
 | Personagem não encontrado | `404` | `NOT_FOUND` | *"Character not found."* |
 | Personagem pertence a outro usuário | `403` | `FORBIDDEN` | *"You do not own this character."* |
-| Parâmetro `charId` ausente | `400` | `BAD_REQUEST` | *"Character ID is required."* |
+
+---
+
+#### `GET /gamer/block/{accountIdBlock}` — Bloqueia/Desbloqueia temporariamente uma conta de jogo
+
+Bloqueia ou desbloqueia temporariamente uma conta de jogo vinculada ao usuário autenticado. O endpoint funciona como uma alternância (toggle): se a conta estiver ativa (`accessLevel >= 0`), ela será bloqueada (com `accessLevel` alterado para `-10` e salvando o anterior). Se ela já estiver bloqueada (`accessLevel == -10`), o nível de acesso anterior será restaurado.
+
+**Parâmetros de Path:**
+
+| Parâmetro | Tipo | Descrição |
+|---|---|---|
+| `accountIdBlock` | `String` | ID UUID da conta de jogo a ser bloqueada/desbloqueada |
+
+**Response — HTTP 200 OK:** `true`
+
+**Cenários de erro específicos:**
+
+| Cenário | HTTP Status | `error` | Mensagem / Motivo |
+|---|---|---|---|
+| Conta de jogo não encontrada ou não pertence ao usuário | `404` | `NOT_FOUND` | *"Account not found"* |
+
+---
 
 ---
 

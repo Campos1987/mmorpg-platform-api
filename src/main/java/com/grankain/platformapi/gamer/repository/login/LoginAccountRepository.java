@@ -13,7 +13,7 @@ import com.grankain.platformapi.gamer.domain.login.LoginGameAccount;
  * Gerenciado pelo {@code LoginDatabase} e seu {@code loginEntityManagerFactory},
  * operando exclusivamente no banco de dados do emulador Lineage 2 ({@code db-login}).
  */
-public interface LoginAccountRepository extends JpaRepository<LoginGameAccount, String> {
+public interface LoginAccountRepository extends JpaRepository<LoginGameAccount, UUID> {
 
     /**
      * Busca todas as contas de jogo vinculadas a um usuário da plataforma pelo seu UUID.
@@ -22,7 +22,7 @@ public interface LoginAccountRepository extends JpaRepository<LoginGameAccount, 
      * @param accountId UUID do usuário da plataforma (PlatformUser.id).
      * @return Lista de contas de jogo vinculadas ao usuário.
      */
-    List<LoginGameAccount> findByAccountId(UUID accountId);
+    List<LoginGameAccount> findByOwnerId(UUID ownerId);
 
     boolean existsByLogin(String login);
 }
