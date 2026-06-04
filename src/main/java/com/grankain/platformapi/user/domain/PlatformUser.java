@@ -23,6 +23,9 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 /**
  * Entidade JPA que representa uma conta de usuário na plataforma web (banco
@@ -34,6 +37,10 @@ import lombok.Setter;
 @Entity
 @Table(name = "accounts")
 @Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class PlatformUser {
 
