@@ -1411,6 +1411,154 @@ true
 
 ---
 
+### 4.8 Consultar Detalhes do Personagem
+
+#### Propósito
+
+Retorna os dados detalhados de um personagem específico por ID (ex: Ragnar). Por segurança, o endpoint valida se o personagem pertence a alguma conta de jogo vinculada ao usuário autenticado.
+
+#### Método e Endpoint
+
+```
+POST /gamer/findCharacters
+```
+
+#### Headers
+
+```http
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer <seu_jwt_token>
+```
+
+#### Corpo da Requisição (Payload)
+
+```json
+{
+  "charId": "100002"
+}
+```
+
+| Campo    | Tipo     | Obrigatório | Restrições                                                                 |
+|----------|----------|-------------|----------------------------------------------------------------------------|
+| `charId` | `string` | Sim         | ID numérico do personagem (ex: "100002")                                   |
+
+#### Respostas Esperadas
+
+**`200 OK` — Consulta bem-sucedida:**
+
+```json
+{
+  "accountName": "campos",
+  "charId": 100002,
+  "charName": "Ragnar",
+  "lvl": 84,
+  "maxHp": 9800.0,
+  "maxMp": 1700.0,
+  "maxCp": 4600.0,
+  "race": 0,
+  "baseClassId": 91,
+  "classId": 91,
+  "exp": 520000000,
+  "karma": 0,
+  "isOnline": 0
+}
+```
+
+---
+
+**`401 Unauthorized` — Token expirado ou Conta inativa:**
+* Ocorre se o JWT for inválido ou a conta da plataforma não estiver ativa.
+* **Exceção no Backend:** Lança `BadCredentialsException`.
+
+---
+
+**`403 Forbidden` — O personagem pertence a outro usuário:**
+* Ocorre se o personagem com o ID informado existir, mas pertencer a uma conta de jogo que não é do usuário autenticado.
+* **Exceção no Backend:** Lança `ResponseStatusException` com status `403 Forbidden` e mensagem `"You do not own this character."`.
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 403,
+  "error": "FORBIDDEN",
+  "message": "You do not own this character.",
+  "trace": [],
+  "path": "/gamer/findCharacters"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "FORBIDDEN",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+**`404 Not Found` — Personagem não encontrado:**
+* Ocorre se não existir nenhum personagem com o ID informado no banco de dados.
+* **Exceção no Backend:** Lança `ResponseStatusException` com status `404 Not Found` e mensagem `"Character not found."`.
+* **Em DEV:**
+```json
+{
+  "timestamp": "2026-06-02T12:45:00Z",
+  "status": 404,
+  "error": "NOT_FOUND",
+  "message": "Character not found.",
+  "trace": [],
+  "path": "/gamer/findCharacters"
+}
+```
+* **Em PROD:**
+```json
+{
+  "timestamp": null,
+  "status": null,
+  "error": "NOT_FOUND",
+  "message": null,
+  "trace": null,
+  "path": null
+}
+```
+
+---
+
+#### TypeScript — Interfaces para este Endpoint
+
+```typescript
+// types/gamer.ts
+
+/** Payload enviado no corpo da requisição de findCharacters */
+export interface FindCharacterRequest {
+    charId: string;
+}
+
+/** Resposta de sucesso contendo os detalhes do personagem */
+export interface CharacterStatus {
+    accountName: string;
+    charId: number;
+    charName: string;
+    lvl: number;
+    maxHp: number;
+    maxMp: number;
+    maxCp: number;
+    race: number;
+    baseClassId: number;
+    classId: number;
+    exp: number;
+    karma: number;
+    isOnline: number;
+}
+```
+
+---
+
 ## 5. Interface Global de Erro (TypeScript)
 
 Copie este arquivo para seu projeto e use em todos os tratamentos de erro da API.
@@ -1471,5 +1619,6 @@ export function isApiError(value: unknown): value is ApiError {
 | `POST`   | `/user/setBirthday`       | `Bearer token` obrigatório | Salva a data de nascimento do usuário logado  |
 | `POST`   | `/user/changePassword`    | `Bearer token` obrigatório | Altera a senha do usuário autenticado         |
 | `POST`   | `/gamer/account`          | `Bearer token` obrigatório | Retorna contas de jogo e personagens vinculados |
+| `POST`   | `/gamer/findCharacters`   | `Bearer token` obrigatório | Busca um personagem por ID (com validação de posse) |
 | `POST`   | `/gamer/create`           | `Bearer token` obrigatório | Cria uma nova conta de jogo vinculada         |
 | Qualquer | Demais rotas              | `Bearer token` obrigatório | Rotas protegidas exigem JWT válido            |

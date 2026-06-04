@@ -442,6 +442,52 @@ Retorna um mapa onde as chaves são os logins das contas do jogo (ex: `GankMaste
 
 ---
 
+#### `POST /gamer/findCharacters` — Busca detalhes de um personagem por ID
+
+Busca os detalhes e o status atual de um personagem específico. Por segurança, o sistema valida se a conta de jogo proprietária do personagem pertence ao usuário autenticado (UUID do JWT).
+
+**Request Body:**
+
+```json
+{
+  "charId": "100002"
+}
+```
+
+| Campo | Tipo | Validações |
+|---|---|---|
+| `charId` | `String` | `@NotNull` (ID numérico do personagem no banco) |
+
+**Response — HTTP 200 OK:**
+
+```json
+{
+  "accountName": "campos",
+  "charId": 100002,
+  "charName": "Ragnar",
+  "lvl": 84,
+  "maxHp": 9800.0,
+  "maxMp": 1700.0,
+  "maxCp": 4600.0,
+  "race": 0,
+  "baseClassId": 91,
+  "classId": 91,
+  "exp": 520000000,
+  "karma": 0,
+  "isOnline": 0
+}
+```
+
+**Cenários de erro específicos:**
+
+| Cenário | HTTP Status | `error` | Mensagem / Motivo |
+|---|---|---|---|
+| Personagem não encontrado | `404` | `NOT_FOUND` | *"Character not found."* |
+| Personagem pertence a outro usuário | `403` | `FORBIDDEN` | *"You do not own this character."* |
+| Parâmetro `charId` ausente | `400` | `BAD_REQUEST` | *"Character ID is required."* |
+
+---
+
 ### 4.5 Padrão de Resposta de Erro
 
 Todas as exceções são capturadas pelo `GlobalExceptionHandler` e retornam o seguinte contrato JSON.

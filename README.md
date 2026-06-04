@@ -50,6 +50,7 @@ Padrões aplicados: Constructor Injection, Rich Domain Model, Value Objects (`@E
 | `GET` | `/actuator/health` | Pública | Health check |
 | `GET` | `/posts/**` | Pública | Leitura de posts/eventos |
 | `POST` | `/gamer/account` | `Bearer <token>` | Retorna contas de jogo e personagens vinculados |
+| `POST` | `/gamer/findCharacters` | `Bearer <token>` | Busca um personagem por ID (com validação de posse) |
 | `POST` | `/gamer/create` | `Bearer <token>` | Cria uma nova conta de jogo vinculada |
 | Qualquer | Demais rotas | `Bearer <token>` | Rotas protegidas |
 
